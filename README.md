@@ -1,24 +1,29 @@
 # Fortress AI 🏰
 
-> **Adaptive Strategy Defense powered by an Intelligent Enemy AI**
+> **Two-Sided Turn-Based Strategy & Simulation powered by Adaptive AI & Swytchcode**
 
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
 [![Vite](https://img.shields.io/badge/Vite-8.2-646CFF.svg)](https://vitejs.dev/)
 [![Express](https://img.shields.io/badge/Express-Backend-000000.svg)](https://expressjs.com/)
+[![Swytchcode](https://img.shields.io/badge/Swytchcode-Integrated-blueviolet.svg)](https://swytchcode.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Fortress AI is a 2D, third-person, turn-based strategy defense game where the player builds, manages, and fortifies a medieval village against an evolving AI adversary. The enemy AI actively analyzes the player's tactical layout, identifies defensive vulnerabilities across directional fronts, and adapts its assault strategies over a 20-turn campaign.
+Fortress AI is a two-sided, turn-based strategy game where players build, defend, and attack enemy empires while an adaptive AI actively responds to their decisions. Players strategically deploy units, target enemy structures, manage resources, construct defenses, and adapt their tactics as the battlefield evolves. The enemy AI can both defend against player assaults and launch its own offensive attacks, creating a dynamic war rather than a one-directional combat system.
+
+Swytchcode is integrated as the controlled execution layer between the AI decision-making system and the game's capabilities. Instead of allowing the AI to directly modify game state, Swytchcode exposes controlled game operations/tools for inspecting the battlefield, evaluating threats, selecting targets, and executing strategic actions. This allows AI decisions to pass through a structured, validated execution layer with appropriate constraints before being applied by the game engine. The result is a safer and more reliable AI architecture where the AI can reason strategically while the deterministic game engine remains the source of truth.
+
+Together, adaptive AI, tactical combat, resource management, and Swytchcode-powered tool execution create a living two-sided battlefield where both the player and AI attack, defend, learn, and adapt.
 
 ---
 
 ## 🎮 What is Fortress AI?
 
-In Fortress AI, you step into the role of a fortress commander tasked with defending your village center from escalating enemy invasions:
+In Fortress AI, you step into the role of a fortress commander tasked with defending your village center while waging an active war against an escalating enemy empire:
 
-- **What the player controls:** You place and position directional fortifications (North, South, East, West walls and gates), build resource generators (farms, lumber mills, quarries, mines), construct defensive structures (archer towers, cannon towers), erect military barracks, recruit specialized garrison units (swordsmen, archers, knights), and upgrade buildings through 3 tiers.
+- **What the player controls:** You place and position directional fortifications (North, South, East, West walls and gates), build resource generators (farms, lumber mills, quarries, mines), construct defensive structures (archer towers, cannon towers), erect military barracks, recruit specialized garrison & assault units (swordsmen, archers, knights, siege rams), launch expeditions against enemy strongholds, and upgrade buildings through 3 tiers.
 - **What the player must manage:** A multi-tiered resource economy (Gold, Wood, Stone, Food), population limits, resource storage caps, and structural hitpoints across all defensive sectors.
-- **What happens during a turn:** You execute your economic expansion, defensive construction, and unit recruitment during the **Player Phase**, then pass control via the **End Turn** command.
-- **What the AI enemy does:** The enemy executes an automated **6-step strategic pipeline** (`SCAN` → `EVALUATE` → `PLAN` → `SCORE` → `EXECUTE` → `LEARN`), pinpointing your weakest defensive direction, calculating threat scores, formulating an attack composition, launching the assault, and updating its internal memory based on combat outcomes.
+- **What happens during a turn:** You execute economic expansion, defensive construction, unit recruitment, and launch targeted empire assaults during the **Player Phase**, then pass control via the **End Turn** command.
+- **What the AI enemy does:** The enemy executes an automated **6-step strategic pipeline** (`SCAN` → `EVALUATE` → `PLAN` → `SCORE` → `EXECUTE` → `LEARN`), pinpointing your weakest defensive direction, calculating threat scores, formulating an attack composition, and updating its internal memory. Furthermore, when the player attacks the enemy empire, the AI evaluates the incoming strike and deploys dynamic defensive doctrines (`HOLD`, `REINFORCE`, `COUNTERATTACK`, `REDIRECT`).
 - **Why decisions have consequences:** Over-investing in economy leaves your walls under-defended; over-fortifying a single wall prompts the AI to flank around unprotected sectors or deploy specialized siege engines; failing to maintain garrison units leaves towers vulnerable to suppression.
 
 ---
@@ -32,86 +37,123 @@ In Fortress AI, you step into the role of a fortress commander tasked with defen
 - Multi-tier upgrades
 - Directional defense networks
 - AI-controlled, strategic enemy attacks
+- Dynamic consequence mechanics where player decisions directly shape outcomes
 
 ### The Strategic Challenge
-Most strategy defense games rely on predetermined waves with hardcoded spawn routes. Fortress AI solves this by introducing dynamic adversarial decision-making: the enemy perceives structural durability, tower coverage, and unit distribution, dynamically choosing between frontal assaults, directional wall breaches, tower suppression strikes, resource raids, or siege bombardments.
+Most strategy defense games rely on predetermined waves with hardcoded spawn routes. Fortress AI solves this by introducing dynamic adversarial decision-making: the enemy perceives structural durability, tower coverage, unit distribution, and economic targets, dynamically choosing between frontal assaults, directional wall breaches, tower suppression strikes, resource raids, or siege bombardments, while mounting intelligent defenses when attacked.
 
 ---
 
 ## 💡 Our Solution
 
-Fortress AI addresses Trial 3 with a unified, deterministic game engine paired with an adaptive AI decision engine:
+Fortress AI addresses Trial 3 with a unified, deterministic game engine paired with an adaptive AI decision engine operating through Swytchcode:
 
 1. **Four-Resource Economic Engine:** Gold, Wood, Stone, and Food generate per turn based on town center bonuses and active resource buildings. Storage facilities expand resource capacities.
 2. **Directional Fortress Construction:** Walls, gates, and towers are positioned along village perimeters. The engine tracks separate health pools and armor ratings for Northern, Southern, Eastern, and Western walls.
-3. **Adaptive Enemy AI:** The AI evaluates defense vectors on each turn, adapts unit compositions (Melee, Ranged, Siege), targets weak links, and remembers failed attack vectors to prevent repetitive exploitation.
+3. **Two-Sided Combat & Adaptive AI:** The AI evaluates defense vectors on each turn, adapts unit compositions (Melee, Ranged, Siege), targets weak links, remembers past combat outcomes, and deploys tactical countermeasures against player invasions.
 4. **Deterministic Combat System with Controlled Variance:** Damage formulas account for base damage, building tier multipliers, armor mitigation formulas, and directional wall breaches, ensuring balanced and reproducible gameplay.
-5. **Real-time Tactical Visualization:** A Canvas-based renderer renders custom-generated sprites, projectile flight paths (arrows, cannonballs), particle explosions, wall breaches, and screen shake.
+5. **Real-time Tactical Visualization:** A Canvas-based renderer displays procedural sprites, projectile flight paths (arrows, cannonballs), particle explosions, wall breaches, and screen shake.
 
 ---
 
 ## ⭐ Key Features
 
-- **Turn-Based Strategy Loop:** 20-turn survival campaign with distinct Player, AI Analysis, Attack, Combat Resolution, and Income phases.
+- **Two-Sided Turn-Based Strategy Loop:** 20-turn campaign with discrete Player, Empire Assault, AI Analysis, Attack, Combat Resolution, and Income phases.
+- **Controlled Swytchcode Execution Layer:** Structured tool execution pipeline for safe, auditable, and validated AI strategic actions.
 - **4-Tier Resource Economy:** Manage Gold, Wood, Stone, and Food with dynamic income calculations and storage capacity caps.
 - **Grid Placement & Construction Queue:** 20×16 grid map with village zone constraints, placement validation, and turn-based construction timers.
 - **Directional Defenses:** North, South, East, and West walls and gates with independent HP pools, armor values, and breach detection.
 - **Building Upgrade System:** 3-tier upgrade paths for all structures (Town Center, Walls, Archer Towers, Cannon Towers, Barracks, Resource Camps, Storage).
-- **Unit Recruitment & Defense Phase:** Recruit Swordsmen, Archers, and Knights from Barracks to counter-attack invading forces during combat.
+- **Unit Recruitment & Combat Phase:** Recruit Swordsmen, Archers, Knights, and Siege Rams from Barracks for home defense and offensive strikes.
 - **6-Step AI Decision Pipeline:** Live visual tracking through `SCAN` → `EVALUATE` → `PLAN` → `SCORE` → `EXECUTE` → `LEARN`.
-- **Hybrid AI Strategy Engine:** Supports LLM-assisted tactical reasoning via OpenAI integration with guaranteed deterministic Fallback AI.
-- **Collapsible Enemy Intelligence Drawer & Mini AI HUD:** Collapsible right-hand drawer detailing threat levels, target fronts, predicted strategies, confidence meters, and AI memory.
-- **Combat Simulation & Animation System:** Animated projectile trajectories, impact bursts, directional wall collapse effects, and camera shake.
-- **Comprehensive Battle Log:** Filtered event stream logging economic yields, construction completions, AI decisions, and combat losses.
+- **Dynamic AI Defensive Doctrines:** AI reacts to player invasions by activating `HOLD`, `REINFORCE`, `COUNTERATTACK`, or `REDIRECT`.
+- **Collapsible Enemy Intelligence Drawer & Mini AI HUD:** Collapsible drawer detailing threat levels, target fronts, predicted strategies, confidence meters, and AI memory.
 - **Deterministic Validation & AI Disclosure:** In-game transparency modal explaining deterministic simulation vs. AI reasoning separation.
-
----
-
-## 🧠 AI System
-
-The Enemy AI operates on a structured **6-stage pipeline** executing every turn once active invasions commence on Turn 3:
-
-```
-┌─────────┐     ┌────────────┐     ┌──────────┐     ┌───────────┐     ┌───────────┐     ┌─────────┐
-│ 1. SCAN │ ──> │ 2.EVALUATE │ ──> │ 3. PLAN  │ ──> │ 4. SCORE  │ ──> │ 5.EXECUTE │ ──> │ 6.LEARN │
-└─────────┘     └────────────┘     └──────────┘     └───────────┘     └───────────┘     └─────────┘
-```
-
-### Pipeline Breakdown
-
-| Stage | Data Evaluated | Execution Type | Output Generated |
-| :--- | :--- | :--- | :--- |
-| **1. SCAN** | Wall HP per direction, active tower coordinates, player garrison count, resource camps, turn number, current enemy army. | Deterministic Engine | Comprehensive JSON state snapshot (`toAISnapshot()`). |
-| **2. EVALUATE** | Directional weakness percentage ($1 - \frac{\text{HP}}{\text{MaxHP}}$), tower overlap per sector, garrison density, resource vulnerability. | Deterministic Engine | Sector threat ratings, vulnerability scores, and player tactical profile (`defensive`, `aggressive`, `economic`, `balanced`). |
-| **3. PLAN** | Predefined strategy candidate vectors (`North Assault`, `South Assault`, `East Wall Breach`, `West Wall Breach`, `Resource Raid`, `Tower Suppression`, `Siege Assault`, `Diversionary`). | Deterministic / LLM | Candidate strategy objects with tailored unit mixes (`enemy_melee`, `enemy_ranged`, `enemy_siege`). |
-| **4. SCORE** | Weighted scoring against target weakness ($w=3.0$), expected damage ($w=2.0$), route accessibility ($w=1.0$), estimated losses ($w=-2.5$), and history penalties ($w=-1.5\times\text{failures}$). | Deterministic / LLM | Ranked strategy candidate list with calculated confidence percentage ($0\% - 100\%$). |
-| **5. EXECUTE** | Top-ranked strategy selection and target confirmation. | Deterministic Engine | Final attack order dispatched to `CombatSystem` and logged to Battle Log. |
-| **6. LEARN** | Combat outcome data: damage dealt, player buildings destroyed, walls breached, enemy casualties. | Deterministic Memory | Updates `aiMemory` history (last 5 turns) and adjusts strategy weights dynamically. |
-
-### Clear Separation of Responsibilities
-
-- **AI / LLM Responsibilities:** High-level strategic reasoning, selecting attack vectors based on perceived vulnerabilities, optimizing unit deployment ratios, and generating tactical rationale.
-- **Deterministic Game-Engine Responsibilities:** Combat resolution math, armor mitigation, resource deduction, construction queues, legal placement validation, hitpoint deduction, and win/loss state enforcement.
 
 ---
 
 ## 🔌 Swytchcode Integration
 
-Fortress AI integrates an Express backend service configured to route strategic analysis through Swytchcode and OpenAI, backed by a deterministic fallback engine.
+Swytchcode serves as the **controlled execution layer** between the AI reasoning system and the deterministic game engine.
 
-### Architecture Flow
+### Why Swytchcode?
+
+Directly coupling an AI/LLM to game state mutations introduces significant security and stability risks, including hallucinations, illegal resource mutations, out-of-bounds actions, and non-deterministic state corruption. Swytchcode solves this by providing:
+
+1. **Controlled Game Operations / Tools:** The AI interacts with the game exclusively through strictly defined, schema-validated tools.
+2. **Deterministic Source of Truth:** Game rules, combat formulas, resource costs, and spatial placements remain 100% deterministic inside the game engine.
+3. **Execution Guardrails:** Boundaries prevent the AI from bypassing game rules, forging unit counts, or teleporting across sectors.
+4. **Auditable Decision Pipeline:** All AI tool invocations, candidate evaluations, and tactical rationales are logged in real-time.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           AI REASONING SYSTEM (LLM)                             │
+│                  OpenAI GPT-4o-mini via Swytchcode Integration                  │
+└──────────────────────────────────────┬──────────────────────────────────────────┘
+                                       │ (Requests Tools & Generates Actions)
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                    SWYTCHCODE CONTROLLED EXECUTION LAYER                         │
+│   • Schema Validation        • Permission Boundaries    • Parameter Clamping    │
+│   • Tool Execution Gateway   • Rate Limiting            • Deterministic Fallback │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  Controlled Tools Exposed to AI:                                                │
+│   1. inspect_battlefield(state)          → Reads directional HP, towers, units  │
+│   2. evaluate_threats(sector)            → Computes vulnerability & risk        │
+│   3. select_offensive_strategy(target)   → Formulates attack vector & unit mix  │
+│   4. execute_defensive_doctrine(context) → Selects HOLD / REINFORCE / COUNTER   │
+└──────────────────────────────────────┬──────────────────────────────────────────┘
+                                       │ (Validated & Clamped Operations)
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         DETERMINISTIC GAME ENGINE                               │
+│              GameState.js • CombatSystem.js • TurnManager.js                    │
+│   (Source of Truth: Resolves combat math, enforces costs, updates HP/state)     │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Swytchcode Tooling Setup & CLI
+
+The project is configured using Swytchcode integration tooling:
+
+```bash
+# 1. Add the OpenAI integration package to tooling.json
+swytchcode add integration vibewright/openai@1.0.0
+
+# 2. Bootstrap dependencies and lockfiles
+swytchcode bootstrap
+
+# 3. List installed integrations and capabilities
+swytchcode list
+
+# 4. Verify system health and permissions
+swytchcode doctor
+```
+
+#### Tooling Configuration (`tooling.json`)
+```json
+{
+  "integrations": {
+    "vibewright/openai@1.0.0": {
+      "version": "1.0.0"
+    }
+  }
+}
+```
+
+### Controlled Execution Flow
 
 ```
    ┌────────────────────────────────────────────────────────┐
    │                   Player (Browser)                     │
    └───────────────────────────┬────────────────────────────┘
-                               │ 1. End Turn Event
+                               │ 1. End Turn / Attack Action
                                ▼
    ┌────────────────────────────────────────────────────────┐
    │                 GameState (Client)                     │
    │           Serializes State via toAISnapshot()          │
    └───────────────────────────┬────────────────────────────┘
-                               │ 2. POST /api/ai/strategy
+                               │ 2. POST /api/ai/strategy (or /defend)
                                ▼
    ┌────────────────────────────────────────────────────────┐
    │             AIExecutionService (Server)                │
@@ -140,14 +182,48 @@ Fortress AI integrates an Express backend service configured to route strategic 
    └────────────────────────────────────────────────────────┘
 ```
 
-### Integration Details
+### Integration Endpoints & Responsibilities
 
-1. **Initialization:** Handled in [`server/index.js`](file:///d:/Trial%203/server/index.js) and [`server/ai/AIExecutionService.js`](file:///d:/Trial%203/server/ai/AIExecutionService.js).
-2. **Configuration:** Controlled via `.env` (`OPENAI_API_KEY`, `PORT`, `ENABLE_LLM_AI`).
-3. **Endpoint:** `POST /api/ai/strategy` receives the serialized game state.
-4. **Structured JSON Output:** The system prompt enforces strict JSON output containing `strategy`, `target`, `unit_mix`, `reason`, and `confidence`.
-5. **Validation Layer:** `AIExecutionService._validateStrategy()` enforces strategy whitelists, clamps direction inputs to valid bounds (`north`, `south`, `east`, `west`), and normalizes unit ratios to sum to $1.0$.
-6. **Graceful Fallback:** If the network request, Swytchcode proxy, or OpenAI API key is unavailable, `FallbackAI.js` instantly scores candidates deterministically with zero interruption to gameplay.
+1. **Offensive Strategy (`POST /api/ai/strategy`):**
+   - Receives snapshot of player base (wall HP per direction, tower coordinates, garrison count, resource camps, turn history).
+   - Prompts the AI to select the optimal offensive vector (`north_assault`, `south_assault`, `east_wall_breach`, `west_wall_breach`, `resource_raid`, `tower_suppression`, `siege_assault`, `diversionary`).
+   - Normalizes unit deployment ratios (`enemy_melee`, `enemy_ranged`, `enemy_siege`) so their sum equals $1.0$.
+
+2. **Defensive Response (`POST /api/ai/defend`):**
+   - Receives context when the player launches an assault against the enemy empire (incoming unit counts, targeted structure, deployed route).
+   - AI evaluates the attack and selects a defensive countermeasure:
+     - `HOLD`: Fortifies structural positions (+35% building defense).
+     - `REINFORCE`: Rushes emergency garrison defenders to threatened assets.
+     - `COUNTERATTACK`: Deploys shock melee units (+75% counter damage) against vulnerable siege rams or archers.
+     - `REDIRECT`: Shifts marksmen to establish crossfire choke points.
+
+3. **Validation & Normalization Layer:**
+   - `AIExecutionService._validateStrategy()` enforces strategy whitelists, clamps direction inputs to valid bounds (`north`, `south`, `east`, `west`), and normalizes unit ratios.
+   - `AIExecutionService._validateDefensiveStrategy()` restricts doctrines to permitted enums and clamps defender counts.
+
+4. **Guaranteed Offline Fallback:**
+   - If the network request or OpenAI API key is unavailable, `FallbackAI.js` executes deterministic heuristic scoring instantly with zero gameplay interruption.
+
+---
+
+## 🧠 AI Decision Pipeline
+
+The Enemy AI operates on a structured **6-stage pipeline** executing every turn once active invasions commence on Turn 3:
+
+```
+┌─────────┐     ┌────────────┐     ┌──────────┐     ┌───────────┐     ┌───────────┐     ┌─────────┐
+│ 1. SCAN │ ──> │ 2.EVALUATE │ ──> │ 3. PLAN  │ ──> │ 4. SCORE  │ ──> │ 5.EXECUTE │ ──> │ 6.LEARN │
+└─────────┘     └────────────┘     └──────────┘     └───────────┘     └───────────┘     └─────────┘
+```
+
+| Stage | Data Evaluated | Execution Type | Output Generated |
+| :--- | :--- | :--- | :--- |
+| **1. SCAN** | Wall HP per direction, active tower coordinates, player garrison count, resource camps, turn number, current enemy army. | Deterministic Engine | Comprehensive JSON state snapshot (`toAISnapshot()`). |
+| **2. EVALUATE** | Directional weakness percentage ($1 - \frac{\text{HP}}{\text{MaxHP}}$), tower overlap per sector, garrison density, resource vulnerability. | Deterministic Engine | Sector threat ratings, vulnerability scores, and player tactical profile (`defensive`, `aggressive`, `economic`, `balanced`). |
+| **3. PLAN** | Predefined strategy candidate vectors (`North Assault`, `South Assault`, `East Wall Breach`, `West Wall Breach`, `Resource Raid`, `Tower Suppression`, `Siege Assault`, `Diversionary`). | Deterministic / LLM | Candidate strategy objects with tailored unit mixes (`enemy_melee`, `enemy_ranged`, `enemy_siege`). |
+| **4. SCORE** | Weighted scoring against target weakness ($w=3.0$), expected damage ($w=2.0$), route accessibility ($w=1.0$), estimated losses ($w=-2.5$), and history penalties ($w=-1.5\times\text{failures}$). | Deterministic / LLM | Ranked strategy candidate list with calculated confidence percentage ($0\% - 100\%$). |
+| **5. EXECUTE** | Top-ranked strategy selection and target confirmation via Swytchcode layer. | Deterministic Engine | Final attack order dispatched to `CombatSystem` and logged to Battle Log. |
+| **6. LEARN** | Combat outcome data: damage dealt, player buildings destroyed, walls breached, enemy casualties. | Deterministic Memory | Updates `aiMemory` history (last 5 turns) and adjusts strategy weights dynamically. |
 
 ---
 
@@ -175,8 +251,9 @@ graph TD
         FAI[FallbackAI.js]
     end
 
-    subgraph External [AI Provider]
-        OAI[OpenAI / Swytchcode]
+    subgraph Swytchcode_OpenAI [Swytchcode Execution Layer]
+        SC[Swytchcode Gateway & Tool Boundaries]
+        OAI[OpenAI vibewright/openai@1.0.0]
     end
 
     MAIN --> GS
@@ -190,9 +267,10 @@ graph TD
     TM --> CS
     TM --> EAI
 
-    EAI -.->|Optional API Call| SRV
+    EAI -.->|Controlled API Request| SRV
     SRV --> AES
-    AES -->|Prompt + State| OAI
+    AES -->|Prompt + Tool Request| SC
+    SC --> OAI
     AES -.->|Fallback on Error| FAI
     AES -->|Validated Strategy| EAI
 
@@ -210,7 +288,7 @@ graph TD
 ┌─────────────────────────────────────────────────────────────┐
 │ 1. PLAYER TURN (Phase: 'player')                            │
 │    • Place economic, defensive, or military buildings       │
-│    • Recruit garrison units at Barracks                     │
+│    • Recruit garrison units or launch empire assault forces │
 │    • Upgrade existing structures or repair damaged walls    │
 └──────────────────────────────┬──────────────────────────────┘
                                │ Click 'END TURN' (or Space/Enter)
@@ -224,10 +302,10 @@ graph TD
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 3. AI ANALYSIS & ATTACK (Turns 3+)                          │
-│    • Execute 6-Step Pipeline (Scan → Evaluate → Plan...)    │
-│    • Select optimal assault vector & unit mix               │
-│    • Animate incoming attack banner                         │
+│ 3. AI STRATEGY & SWYTCHCODE EXECUTION (Turns 3+)            │
+│    • Swytchcode controlled tool inspection & threat score   │
+│    • Select optimal assault vector & normalized unit mix    │
+│    • Animate incoming attack banner & tactical alert        │
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                ▼
@@ -244,7 +322,7 @@ graph TD
 │ 5. STATE RESOLUTION & INCOME                                │
 │    • AI learns from combat outcome & updates memory         │
 │    • Check Game Over (Town Center destroyed = Defeat)       │
-│    • Check Victory (Survived 20 turns = Victory)            │
+│    • Check Victory (Survived 20 turns / Defeated Empire)    │
 │    • Collect resource income based on active buildings      │
 │    • Advance Turn counter → Return to Step 1                │
 └─────────────────────────────────────────────────────────────┘
@@ -262,7 +340,7 @@ The centralized store managing:
 - Event emission (`on`, `off`, `emit`) for decoupled system updates.
 
 ### 2. `TurnManager.js`
-Coordinates turn phase transitions, triggers build queue progress, invokes enemy reinforcement scaling, calls the AI decision pipeline, resolves combat, and evaluates win/loss conditions.
+Coordinates turn phase transitions, triggers build queue progress, invokes enemy reinforcement scaling, calls the AI decision pipeline via Swytchcode, resolves combat, and evaluates win/loss conditions.
 
 ### 3. `ResourceSystem.js`
 Handles economic recalculations:
@@ -277,21 +355,22 @@ Controls grid spatial validation:
 - Manages multi-turn construction queues and structural repairs.
 
 ### 5. `UnitSystem.js`
-Manages garrison forces:
+Manages military forces:
 - Validates recruitment against food/gold costs, population caps, and active Barracks.
+- Supports Swordsmen, Archers, Knights, and Siege Rams.
 - Handles unit HP pools, armor mitigation, inter-turn healing, and casualty cleanup.
 
 ### 6. `CombatSystem.js`
-Implements the three-stage combat simulation:
+Implements the deterministic combat simulation:
 - **Tower Auto-Fire:** Towers engage approaching forces using target priority (`Siege` → `Melee` → `Ranged`). Cannon towers deal $40\%$ splash damage.
-- **Unit Defense:** Garrison units intercept enemies, applying damage modifiers and receiving counter-attacks.
+- **Unit Defense & Counter-Attack:** Garrison units intercept enemies, applying damage modifiers and receiving counter-attacks.
 - **Building Assault:** Surviving enemies attack designated directional walls or structures. Wall breaches grant $+50\%$ bonus damage to interior targets.
-- Damage formula:
+- Damage formulas:
   $$\text{Damage} = \text{BaseDamage} \times \text{LevelMultiplier} \times \text{TargetModifier} \times \text{Variance}_{[0.85, 1.15]}$$
   $$\text{EffectiveDamage} = \max\left(1, \text{Damage} \times \frac{100}{100 + \text{Armor}}\right)$$
 
 ### 7. `GameRenderer.js`, `SpriteSystem.js`, `ParticleSystem.js`, `AnimationSystem.js`
-- **GameRenderer:** Fullscreen 2D canvas renderer drawing procedural terrain, grid overlays, buildings, garrison units, health bars, and placement ghosts.
+- **GameRenderer:** Fullscreen 2D canvas renderer drawing procedural terrain, grid overlays, buildings, units, health bars, and placement ghosts.
 - **SpriteSystem:** Procedural canvas sprite generation with distinct visual states per building tier and unit type.
 - **ParticleSystem:** High-performance particle emitter rendering combat explosions, smoke puffs, and destruction debris.
 - **AnimationSystem:** Handles projectile flight curves (arrows, cannonballs) and screen shake effects.
@@ -313,7 +392,7 @@ The UI provides an immersive HUD overlay that maintains maximum visibility of th
 
 ## 🛡️ Game Rules & Validation
 
-1. **State Isolation:** The AI cannot directly modify player resources, teleport units, or bypass construction requirements. It submits attack orders that are strictly evaluated by the deterministic engine.
+1. **State Isolation:** The AI cannot directly modify player resources, teleport units, or bypass construction requirements. It submits strategic decisions through Swytchcode that are strictly evaluated by the deterministic engine.
 2. **Construction Rules:** Structures can only be built on valid, unoccupied grid cells within defined village borders. Walls must be placed on perimeter cells.
 3. **Resource Spending Protection:** Every placement, recruitment, and upgrade undergoes strict affordability validation before state mutation.
 4. **AI Schema Validation:** All strategy inputs from external services undergo schema verification, defaulting safely to standard attack formations if malformed data is received.
@@ -323,9 +402,9 @@ The UI provides an immersive HUD overlay that maintains maximum visibility of th
 ## 🤖 AI Disclosure
 
 - **Strategic AI Engine:** Uses a 6-stage decision pipeline to evaluate defense layout and formulate attacks.
-- **LLM Reasoning (Optional):** When configured, OpenAI GPT-4o-mini provides tactical strategy selection via structured JSON outputs.
+- **LLM Reasoning:** OpenAI GPT-4o-mini accessed via Swytchcode integration provides tactical strategy selection via structured JSON outputs.
 - **Deterministic Simulation:** Combat damage, building construction, resource generation, and win/loss rules are 100% deterministic and enforced by the local JavaScript engine.
-- **Swytchcode Role:** Acts as the backend execution layer handling API routing, execution policies, and structured validation.
+- **Swytchcode Role:** Acts as the controlled execution layer handling API routing, tool exposure, schema validation, and execution guardrails.
 - **Offline / Fallback Mode:** The game is fully functional offline using the built-in deterministic scoring algorithm in `FallbackAI.js`.
 
 ---
@@ -335,8 +414,9 @@ The UI provides an immersive HUD overlay that maintains maximum visibility of th
 ### Verification Checklist
 - [x] **Dev Server Startup:** Vite runs without build errors or asset loading failures.
 - [x] **Express Backend:** Health check endpoint (`GET /api/health`) responds with server status.
+- [x] **Swytchcode Integration:** `tooling.json` configured with `vibewright/openai@1.0.0` integration.
 - [x] **Turn Loop Execution:** Turn transition advances economy, processes build queue, and updates state.
-- [x] **AI Strategy Execution:** AI pipeline triggers on Turn 3+, generating valid strategy outputs.
+- [x] **Two-Sided Combat:** AI strategy execution and defensive doctrine responses both function reliably.
 - [x] **Combat System:** Tower auto-fire, unit defense, wall breaches, and damage formulas execute accurately.
 - [x] **Fallback Reliability:** Game operates seamlessly when LLM backend is offline.
 
@@ -347,6 +427,7 @@ The UI provides an immersive HUD overlay that maintains maximum visibility of th
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v18.0.0 or higher)
 - npm (v9.0.0 or higher)
+- [Swytchcode CLI](https://swytchcode.com/) (optional for managing tooling integrations)
 
 ### Installation
 
@@ -361,7 +442,13 @@ The UI provides an immersive HUD overlay that maintains maximum visibility of th
    npm install
    ```
 
-3. **Configure Environment Variables (Optional):**
+3. **Install Swytchcode Integrations (Optional):**
+   ```bash
+   swytchcode add integration vibewright/openai@1.0.0
+   swytchcode bootstrap
+   ```
+
+4. **Configure Environment Variables:**
    Copy the example environment file:
    ```bash
    cp .env.example .env
@@ -376,7 +463,7 @@ The UI provides an immersive HUD overlay that maintains maximum visibility of th
    ```
    *Open [http://localhost:5173](http://localhost:5173) in your browser.*
 
-2. **Start the Backend Server (Optional for LLM AI):**
+2. **Start the Backend Server (for Swytchcode / LLM AI):**
    ```bash
    node server/index.js
    ```
@@ -409,11 +496,14 @@ Trial 3/
 ├── package.json                   # Dependencies & build scripts
 ├── vite.config.js                 # Vite configuration with /api proxy
 ├── .env.example                   # Environment configuration template
+├── .swytchcode/                   # Swytchcode tooling configuration
+│   ├── tooling.json               # Integration manifest (vibewright/openai@1.0.0)
+│   └── workspace.json             # Swytchcode workspace definition
 │
 ├── server/                        # Backend Service
 │   ├── index.js                   # Express server & API routes
 │   └── ai/
-│       ├── AIExecutionService.js  # OpenAI / Swytchcode strategy service
+│       ├── AIExecutionService.js  # Swytchcode / OpenAI strategy service
 │       └── FallbackAI.js          # Deterministic scoring engine
 │
 ├── src/                           # Client-Side Application
@@ -455,13 +545,14 @@ Trial 3/
 ## 🏆 Hackathon Alignment
 
 Fortress AI directly fulfills all criteria for **Trial 3 (Strategy & Simulation)**:
-- **2D & Third-Person:** Rendered on an HTML5 canvas with a top-down isometric tactical perspective.
-- **Turn-Based Loop:** Discrete player decisions followed by structured AI deliberation and combat phases.
+- **2D & Third-Person:** Rendered on an HTML5 canvas with a top-down tactical perspective.
+- **Two-Sided Turn-Based Loop:** Discrete player decisions followed by structured AI deliberation, player assaults, and combat phases.
 - **Multi-Tier Resource Economy:** Active production and management of Gold, Wood, Stone, and Food.
 - **Inventory & Capacity Limits:** Storage buildings govern maximum resource stockpiles.
 - **Construction & Upgrades:** Multi-tier progression for defensive, economic, and military infrastructure.
 - **Directional Defenses:** Directional wall and gate network protecting against targeted incursions.
 - **Intelligent Enemy Strategy:** 6-step AI decision engine that analyzes defense gaps and adapts attack vectors.
+- **Swytchcode Controlled Execution:** Safe execution layer exposing controlled game operations with schema validation.
 - **Robust Integration & Fallback:** Hybrid architecture leveraging LLM reasoning with an offline deterministic fallback.
 
 ---
