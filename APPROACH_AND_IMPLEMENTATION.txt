@@ -1,0 +1,573 @@
+================================================================================
+FORTRESS AI — APPROACH AND IMPLEMENTATION DOCUMENT
+Trial 3: Strategy & Simulation | Hackathon Submission
+================================================================================
+
+1. PROJECT OVERVIEW
+--------------------------------------------------------------------------------
+Project Name: Fortress AI
+Objective: Build a 2D, third-person, turn-based strategy defense game demonstrating 
+player consequence and adaptive, strategic AI-controlled enemy decision-making.
+
+Trial 3 Requirements:
+- 2D representation with a third-person tactical perspective
+- Turn-based gameplay loop
+- Multi-resource economy and resource storage management
+- Construction, upgrading, and structural durability systems
+- Directional defenses against targeted incursions
+- Strategic AI-controlled attacks that adapt to player behavior
+- Clear consequence mechanics where player decisions directly impact outcomes
+
+Game Concept:
+The player takes command of a medieval fortress village centered around a Town Center. 
+Over a 20-turn campaign, the player balances economic expansion (farms, lumber mills, 
+quarries, gold mines), defensive fortifications (North, South, East, West walls and 
+gates), active defense towers (archer towers, cannon towers), and military garrisons 
+(swordsmen, archers, knights). 
+
+Starting on Turn 3, an invading enemy army begins launching structured assaults. The 
+enemy AI actively analyzes the player's structural layout, identifies defensive 
+vulnerabilities, formulates tactical attack vectors, and adapts its strategies based 
+on past combat successes and failures.
+
+Core Strategic Challenge:
+Resource scarcity and limited turns create a continuous tactical tension:
+- Investing heavily in economy yields high future income but leaves current perimeter 
+  walls weak and vulnerable to early breaches.
+- Fortifying a single wall sector causes the AI to pivot and strike undefended fronts.
+- Neglecting garrison units leaves defensive towers exposed to specialized siege forces.
+- Surviving all 20 turns requires dynamic defensive rebalancing, structural repairs, 
+  and predictive counters to enemy strategy shifts.
+
+
+2. PROBLEM INTERPRETATION
+--------------------------------------------------------------------------------
+We interpreted the Trial 3 challenge not as a simple wave-defense game with static 
+spawn paths, but as an adversarial simulation where both the player and the AI 
+operate under deterministic rules and strategic constraints:
+
+- Resources: A 4-resource economy (Gold, Wood, Stone, Food). Every building, upgrade, 
+  and unit recruitment requires specific resource combinations.
+- Inventory / Storage: Resource stockpiles are constrained by base capacity caps 
+  (2000 Gold, 1500 Wood, 1500 Stone, 1000 Food). Players must construct dedicated 
+  Storage facilities to expand their economic ceiling.
+- Construction: A discrete 20x16 grid map with designated village zones. Structures 
+  require turn-based construction timers (e.g., 1-2 turns) managed via an asynchronous 
+  build queue.
+- Upgrades: 3-tier linear upgrade progression for all structures, enhancing hitpoints, 
+  armor ratings, resource yields, tower damage, and population capacities.
+- Defenses: Directional wall networks (North, South, East, West) with independent health 
+  pools, damage mitigation, and breach thresholds.
+- Turn-Based Decisions: Player takes deliberate actions during the Player Phase, with 
+  all actions resolving in a clean state change before passing execution to the AI.
+- AI-Controlled Attacks: The enemy AI evaluates the game state dynamically rather than 
+  executing hardcoded script triggers.
+- Consequences: Every action has a direct, observable consequence in game state, logged 
+  in real-time to the Battle Log and rendered on the battlefield canvas.
+
+
+3. DESIGN PHILOSOPHY
+--------------------------------------------------------------------------------
+Central Design Principle:
+"Every player decision should have a measurable consequence."
+
+Strategic Trade-offs Built into the Engine:
+1. Greed vs. Security:
+   Constructing a Resource Camp costs 150 Gold and 100 Wood and takes 2 turns to build. 
+   While constructing, it generates zero income and provides zero defense. If the enemy 
+   attacks that sector, the building can be destroyed before yielding any return.
+2. Directional Vulnerability:
+   Building an Archer Tower in the North protects the northern road, but depletes Stone 
+   and Wood needed for the South wall. The AI evaluates directional tower coverage and 
+   will pivot attack vectors to the South or East if northern defenses are formidable.
+3. Unit Composition Counter-play:
+   Player garrison units (Swordsmen, Archers, Knights) have explicit unit matchup 
+   modifiers (e.g., Knights deal 1.4x bonus damage against Enemy Siege, Archers deal 1.3x 
+   against Enemy Melee). Recruiting the wrong unit mix results in severe garrison 
+   casualties during combat resolution.
+
+
+4. HIGH-LEVEL ARCHITECTURE
+--------------------------------------------------------------------------------
+The application architecture cleanly decouples the deterministic game engine from the 
+AI strategy layer and the rendering pipeline:
+
++-----------------------------------------------------------------------------+
+|                               PLAYER ACTION                                 |
+|          (UI Interaction: Build, Upgrade, Recruit, End Turn)                |
++--------------------------------------┬--------------------------------------+
+                                       │
+                                       ▼
++-----------------------------------------------------------------------------+
+|                           GAME UI / HUD (HUD.js)                            |
+|        (Top Bar, Build Panel, Mini-HUD, Collapsible AI Drawer, Log)         |
++--------------------------------------┬--------------------------------------+
+                                       │
+                                       ▼
++-----------------------------------------------------------------------------+
+|                         GAME STATE (GameState.js)                           |
+|        (Single Source of Truth: Resources, Buildings, Units, Stats)         |
++--------------------------------------┬--------------------------------------+
+                                       │
+                                       ▼
++-----------------------------------------------------------------------------+
+|                       TURN MANAGER (TurnManager.js)                         |
+|      (Phases: Player -> AI Analyzing -> AI Attacking -> Combat -> Income)   |
++--------------------------------------┬--------------------------------------+
+                                       │
+                                       ▼
++-----------------------------------------------------------------------------+
+|                       AI STRATEGY LAYER (EnemyAI.js)                        |
+|              (6-Step Pipeline: Scan -> Evaluate -> Plan -> Score)           |
++--------------------------------------┬--------------------------------------+
+                                       │
+            +──────────────────────────┴──────────────────────────+
+            │ (Optional Network Call)                             │ (Offline/Fallback)
+            ▼                                                     ▼
++---------------------------------------+     +-------------------------------+
+|     EXPRESS SERVER (server/index.js)  |     |  DETERMINISTIC FALLBACK AI    |
+|   (AIExecutionService + Swytchcode)   |     |        (FallbackAI.js)        |
++-------------------┬-------------------+     +───────────────┬───────────────+
+                    │                                         │
+                    ▼                                         │
++---------------------------------------+                     │
+|         OPENAI GPT-4o-mini            |                     │
+|    (Structured JSON Strategy Output)  |                     │
++-------------------┬-------------------+                     │
+                    │                                         │
+                    ▼                                         │
++-------------------------------------------------------------+               │
+|            SCHEMA VALIDATION & NORMALIZATION                | ◄─────────────+
+|     (Clamps values, verifies direction, normalizes mix)     |
++--------------------------------------┬----------------------+
+                                       │
+                                       ▼
++-----------------------------------------------------------------------------+
+|                      COMBAT SYSTEM (CombatSystem.js)                        |
+|   (Tower Auto-Fire -> Garrison Defense -> Building Assault -> Wall Breaches)|
++--------------------------------------┬--------------------------------------+
+                                       │
+                                       ▼
++-----------------------------------------------------------------------------+
+|                   ANIMATION & RENDERING PIPELINE                            |
+|   (GameRenderer.js + AnimationSystem.js + ParticleSystem.js + Sprites)      |
++--------------------------------------┬--------------------------------------+
+                                       │
+                                       ▼
++-----------------------------------------------------------------------------+
+|                         UPDATED GAME STATE (Turn N+1)                       |
++-----------------------------------------------------------------------------+
+
+
+5. FRONTEND ARCHITECTURE
+--------------------------------------------------------------------------------
+The frontend is built using standard ES Modules and bundled with Vite.
+
+Key Source Files:
+- src/main.js: Application bootstrapper. Instantiates the GameState, systems, 
+  GameRenderer, AnimationSystem, and HUD overlay. Binds keyboard shortcuts (Space/Enter 
+  to End Turn, 1-4 for tabs, Escape to deselect).
+- src/game/GameState.js: Centralized reactive data store with pub/sub event emitter.
+- src/ui/HUD.js: DOM controller managing HUD elements, tab switching, build card 
+  rendering, real-time resource labels, battle log streaming, and the collapsible AI 
+  drawer.
+- src/styles/main.css: Glassmorphism theme using CSS variables, custom scrollbars, 
+  micro-animations, and responsive layouts.
+- src/renderer/GameRenderer.js: HTML5 Canvas 2D engine rendering the 20x16 tile grid, 
+  terrain textures, directional walls, building sprites, garrison units, health bars, 
+  and placement preview ghosts.
+- src/renderer/AnimationSystem.js: Manages active projectile flight paths (arrows, 
+  cannonballs) and screen shake effects.
+- src/renderer/ParticleSystem.js: High-performance particle engine generating combat 
+  impacts, explosive debris, and structural dust.
+- src/renderer/SpriteSystem.js: Procedural 2D sprite generation for buildings (Town 
+  Center, Walls, Towers, Barracks, Storage) and units with distinct visual tiers.
+
+
+6. GAME STATE
+--------------------------------------------------------------------------------
+All application state lives inside `GameState.js`, acting as the single source of 
+truth. No system mutates state directly without going through verified methods.
+
+GameState Structure:
+1. Turn Tracking:
+   - turn: Current turn number (1 to 20)
+   - maxTurns: 20
+   - phase: Current phase string ('player', 'ai_analyzing', 'ai_attacking', 'combat', 
+     'resolution', 'game_over')
+2. Resources & Economy:
+   - resources: { gold, wood, stone, food }
+   - resourceCaps: { gold, wood, stone, food }
+   - income: { gold, wood, stone, food }
+3. Population:
+   - population: Current recruited military population
+   - maxPopulation: Capacity governed by Town Center tier and Barracks
+4. Structures & Grid:
+   - buildings: Array of { id, type, level, hp, maxHp, col, row, direction, 
+     constructing, turnsLeft }
+   - terrain: 20x16 2D matrix of tile definitions ({ type, decoration })
+5. Military Forces:
+   - playerUnits: Array of active garrison units ({ id, type, hp, maxHp, col, row })
+   - enemyArmy: Current enemy reserve counts ({ enemy_melee, enemy_ranged, enemy_siege })
+   - enemyTotalStrength: Calculated aggregate strength metric
+6. Directional Defenses:
+   - walls: { north, south, east, west } with aggregated HP, maxHp, and segment lists
+7. AI & Combat Logs:
+   - aiMemory: Array of historical attack outcomes (last 5 turns)
+   - lastAIStrategy: Active strategy object chosen by AI
+   - aiPipelineStep: Active step in AI pipeline ('scan', 'evaluate', 'plan', 'score', 
+     'execute', 'learn')
+   - battleLog: Array of log messages ({ turn, message, type, timestamp })
+8. Aggregate Stats:
+   - stats: { buildingsBuilt, unitsRecruited, enemiesKilled, damageDealt, damageTaken, 
+     resourcesSpent, turnsPlayed }
+
+
+7. TURN SYSTEM
+--------------------------------------------------------------------------------
+The turn lifecycle is managed by `TurnManager.js` and executes sequentially:
+
+Step 1: Player Action Phase (phase: 'player')
+- Player spends resources to place buildings, recruit units, or upgrade structures.
+- Actions queue up immediately. Unoccupied grid cells show placement validity.
+
+Step 2: Turn End Trigger
+- Triggered by clicking "END TURN" button or pressing Space/Enter.
+- UI locks into processing mode to prevent race conditions.
+
+Step 3: Construction & Unit Maintenance
+- `BuildingSystem.processBuildQueue()` decrements `turnsLeft` on constructing buildings. 
+  Finished buildings activate and update income/caps.
+- `UnitSystem.healUnits()` applies natural 10% health regeneration to surviving garrison 
+  units.
+- `CombatSystem.reinforceEnemy()` adds scaled reinforcements to the enemy army reserve.
+
+Step 4: AI Analysis Phase (Turns 3+, phase: 'ai_analyzing')
+- Enemy AI executes the 6-step strategy pipeline.
+- UI highlights active pipeline steps in the AI War Room.
+
+Step 5: Attack & Combat Phase (phase: 'ai_attacking' -> 'combat')
+- AI deploys attack force.
+- `CombatSystem.resolveCombat()` computes tower fire, garrison defense, and building 
+  assaults.
+- Visual animations (projectiles, explosions, screen shake) trigger on canvas.
+- AI memory logs the outcome via `EnemyAI.learn()`.
+
+Step 6: State Resolution & Victory Check (phase: 'resolution')
+- If Town Center HP reaches 0 -> Defeat modal triggers.
+- If Turn > 20 -> Victory modal triggers.
+- `ResourceSystem.collectIncome()` deposits newly generated resources up to storage caps.
+- Turn advances to Turn N+1, returning control to Player Phase.
+
+
+8. RESOURCE SYSTEM
+--------------------------------------------------------------------------------
+Implemented in `ResourceSystem.js`.
+
+Resources:
+- Gold (💰): Required for buildings, upgrades, unit recruitment, and structural repairs.
+- Wood (🪵): Required for perimeter walls, archer towers, and barracks.
+- Stone (🪨): Required for heavy fortifications, cannon towers, and wall upgrades.
+- Food (🍖): Required for military garrison recruitment and upkeep.
+
+Economic Mechanics:
+- Base Generation: Gold (+25), Wood (+15), Stone (+10), Food (+15) per turn.
+- Building Multipliers: Constructing Resource Camps (Tier 1-3) adds substantial per-turn 
+  yields (e.g., Tier 1 yields +30 Gold, +20 Wood, +15 Stone, +20 Food).
+- Storage Caps: Base caps (2000 Gold, 1500 Wood, 1500 Stone, 1000 Food) prevent infinite 
+  resource accumulation. Building Storage facilities increases caps (+1000/+800/+800/+500 
+  per storage building).
+- Affordability Checks: Every placement strictly verifies `canAfford(cost)` before 
+  deducting balances.
+
+
+9. BUILDING AND UPGRADE SYSTEM
+--------------------------------------------------------------------------------
+Implemented in `BuildingSystem.js` and defined in `src/data/buildings.js`.
+
+Available Structures:
+1. Town Center (Core): Starting base. Destruction causes instant defeat. Upgradable 
+   to Tier 3 for increased HP, income bonuses, and population limit bonuses.
+2. Walls & Gates (Defense): Must be placed on perimeter cells. Tracks directional 
+   orientation (North, South, East, West). Upgradable to Tier 3 (HP: 200 -> 350 -> 550, 
+   Armor: 10 -> 20 -> 35).
+3. Archer Tower (Defense): High-frequency single-target defense. Range: 3-5 tiles. 
+   Damage: 25-65.
+4. Cannon Tower (Defense): Heavy splash defense. Deals 40% collateral splash damage to 
+   adjacent enemy units. Damage: 50-130.
+5. Barracks (Military): Enables recruitment of Swordsmen, Archers, and Knights.
+6. Resource Camp (Economy): Boosts per-turn resource generation.
+7. Storage (Economy): Expands maximum resource stockpiling capacity.
+
+Construction Lifecycle:
+- Placing a structure sets `constructing: true` and initializes `turnsLeft: buildTime`.
+- HP starts at 0 during construction; structure does not provide benefits or defense 
+  until construction completes.
+- Upgrading existing structures costs resources and increments level upon completion.
+
+
+10. COMBAT SYSTEM
+--------------------------------------------------------------------------------
+Implemented in `CombatSystem.js` and defined in `src/data/balancing.js`.
+
+Combat executes in 3 deterministic phases:
+
+Phase 1: Tower Auto-Fire
+Active defensive towers prioritize targets according to threat hierarchy:
+Priority: Enemy Siege -> Enemy Melee -> Enemy Ranged
+Damage Formula:
+  Damage = BaseDamage * LevelMultiplier[level-1] * RandomVariance[0.85, 1.15]
+  EffectiveDamage = max(1, Damage * (100 / (100 + TargetArmor)))
+Cannon towers apply 40% splash damage to up to 2 additional enemy units.
+
+Phase 2: Garrison Unit Defense
+Player garrison units intercept attacking forces:
+- Swordsman: High HP, balanced armor. Deals 1.2x modifier vs Enemy Ranged.
+- Archer: Ranged counter. Deals 1.3x modifier vs Enemy Melee.
+- Knight: Heavy cavalry. Deals 1.4x modifier vs Enemy Siege.
+Invading enemies counter-attack garrison units simultaneously.
+
+Phase 3: Enemy Assault on Structures
+Surviving enemy units assault target structures determined by the AI strategy:
+- Siege engines apply 2.5x building damage multipliers against walls.
+- If a wall sector reaches 0 HP, a "WALL BREACH" is triggered, applying a +50% 
+  vulnerability damage multiplier to interior buildings.
+- If no walls remain, enemies assault interior towers, economic camps, and the Town 
+  Center directly.
+
+
+11. AI STRATEGY SYSTEM
+--------------------------------------------------------------------------------
+Implemented in `src/ai/EnemyAI.js`.
+
+The enemy AI executes a 6-stage cognitive loop:
+
+1. SCAN:
+   Collects complete snapshot of player defenses:
+   - Wall HP and max HP across North, South, East, West
+   - Active tower counts, levels, positions, and average HP
+   - Player garrison count and unit types
+   - Resource buildings and turn count
+   - Current enemy reserve army
+
+2. EVALUATE:
+   Calculates vulnerability metrics for each defensive vector:
+   - Weakness Score: Weakness = 1.0 - (CurrentHP / MaxHP) (1.0 if no wall exists)
+   - Tower Coverage: Counts towers protecting that sector
+   - Threat Rating: Threat = Weakness * 10 - (TowerCoverage * 3) - (NearbyUnits * 2)
+   - Profiles player playstyle: 'defensive', 'aggressive', 'economic', or 'balanced'
+
+3. PLAN:
+   Generates candidate strategies from strategy library:
+   - North Assault, South Assault, East Wall Breach, West Wall Breach
+   - Resource Raid (targets economy camps)
+   - Tower Suppression (focuses down defensive towers)
+   - Siege Assault (heavy siege unit composition against fortified walls)
+   - Diversionary Strike (feints at one sector while targeting another)
+
+4. SCORE:
+   Scores each candidate strategy using weighted multi-factor utility scoring:
+   - Target Weakness (Weight: +3.0)
+   - Expected Damage (Weight: +2.0)
+   - Resource Value (Weight: +1.5 for resource raids)
+   - Route Accessibility (Weight: +1.0 for low tower density)
+   - Estimated Losses (Weight: -2.5 for high defense density)
+   - Adaptation Bonus (Weight: +2.0 / (recent_uses + 1))
+   - Failure Penalty (Score -= 1.5 * recent_failures)
+   - Confidence Percentage: Calculated from total score normalized to [0.1, 1.0]
+
+5. EXECUTE:
+   Selects the highest-scoring strategy, logs the decision, and dispatches attack 
+   formation to CombatSystem.
+
+6. LEARN / ADAPT:
+   After combat resolves, records the outcome in `aiMemory`:
+   - If attack succeeded (wall breached or buildings destroyed): Increases target 
+     weakness and damage weights (+5% / +2%).
+   - If attack failed (repelled with zero breaches): Increases adaptation bonus (+10%) 
+     and loss penalty (+5%), forcing the AI to explore alternate attack angles on the 
+     next turn.
+
+
+12. LLM ROLE
+--------------------------------------------------------------------------------
+When enabled via Express backend (`server/index.js`), the LLM (OpenAI GPT-4o-mini via 
+Swytchcode) provides strategic reasoning:
+
+Information Sent to LLM:
+- Wall status across all 4 directions with exact HP percentages
+- Active tower positions, tiers, and HP
+- Player garrison unit count
+- Enemy army composition
+- Last 3 attack outcomes (strategy used, success/failure, buildings destroyed, losses)
+
+System Prompt & Task:
+The model acts as an adversarial military strategist tasked with finding tactical 
+flaws in player defenses, selecting an optimal strategy ID, target direction, unit 
+deployment mix, rationale, and confidence rating.
+
+Strict Boundary Constraints:
+- What the LLM is allowed to decide: Strategy ID, target direction, unit mix percentages, 
+  and tactical reasoning.
+- What the LLM is NOT allowed to control: It cannot alter resource quantities, spawn 
+  extra units, bypass combat math, deal arbitrary damage, or modify game rules.
+
+
+13. STRUCTURED AI OUTPUT
+--------------------------------------------------------------------------------
+The backend enforces a strict JSON schema output from the LLM:
+
+```json
+{
+  "strategy": "east_wall_breach",
+  "target": "east",
+  "unit_mix": {
+    "enemy_melee": 0.6,
+    "enemy_ranged": 0.2,
+    "enemy_siege": 0.2
+  },
+  "reason": "Eastern wall HP reduced to 35% with zero supporting cannon towers.",
+  "confidence": 0.85
+}
+```
+
+
+14. VALIDATION
+--------------------------------------------------------------------------------
+Implemented in `AIExecutionService._validateStrategy()`.
+
+Before any AI decision reaches the game state, it undergoes strict sanitization:
+1. Strategy Whitelist Check: Validates `strategy` against allowed enum list 
+   (`['east_wall_breach', 'west_wall_breach', 'north_assault', 'south_assault', 
+   'resource_raid', 'tower_suppression', 'siege_assault', 'diversionary']`). 
+   Defaults to `'north_assault'` if unrecognized.
+2. Direction Whitelist Check: Clamps `target` strictly to `['north', 'south', 'east', 'west']`.
+3. Unit Mix Normalization: Clamps all individual unit percentages to [0.0, 1.0] and 
+   normalizes the sum of `enemy_melee + enemy_ranged + enemy_siege` to exactly 1.0.
+4. Confidence Clamping: Bounds confidence rating between 0.1 and 1.0.
+5. Priority Mapping: Automatically generates deterministic structural target priority 
+   queue based on validated strategy.
+
+
+15. FALLBACK AI
+--------------------------------------------------------------------------------
+Implemented in `server/ai/FallbackAI.js`.
+
+If the OpenAI API key is missing, network requests fail, or the backend is offline:
+- The game automatically falls back to `FallbackAI.js` without error or disruption.
+- Uses identical deterministic utility evaluation equations matching client-side logic.
+- Guarantees 100% offline playability with zero degradation in game mechanics.
+
+
+16. RENDERING AND ANIMATION
+--------------------------------------------------------------------------------
+The visual layer uses pure HTML5 Canvas 2D without heavy external dependencies:
+
+- Canvas Rendering (`GameRenderer.js`): Dynamic 60 FPS requestAnimationFrame loop. 
+  Draws terrain grid, roads, water tiles, environmental foliage, building footprints, 
+  directional walls, garrison troops, placement guides, and hover highlights.
+- Procedural Sprites (`SpriteSystem.js`): Procedurally draws detailed pixel-aesthetic 
+  vector graphics for Town Centers, Walls, Archer Towers, Cannon Towers, Barracks, 
+  Storage, Farms, Mines, and Swordsmen/Archers/Knights.
+- Projectile Animation (`AnimationSystem.js`): Renders smooth parabolic curves for 
+  arrows and cannonballs flying from tower coordinates toward invading units.
+- Particle Effects (`ParticleSystem.js`): Particle emitter supporting explosion bursts, 
+  fire sparks, wall collapse debris, and building construction dust.
+- Screen Shake (`renderer.shake(intensity)`): Decaying camera shake triggered during 
+  explosions, building destruction, and wall breaches.
+
+
+17. UI / AI WAR ROOM
+--------------------------------------------------------------------------------
+The UI is engineered to provide complete transparency into AI reasoning without 
+compromising gameplay flow:
+
+1. AI Mini-HUD (Top-Right):
+   Floating summary card displaying Threat Level (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`), 
+   Target Sector, Predicted Strategy, Confidence %, and real-time 6-step progress dots.
+2. Collapsible Enemy Intelligence Drawer (Right Side):
+   Full slide-out drawer providing deep tactical data:
+   - AI Operational Status (`Monitoring`, `ANALYZING...`, `ATTACKING!`)
+   - Enemy Force Composition Bar with breakdown badges
+   - Weakest Point Indicator with live directional HP gauge
+   - Predicted Strategy with Confidence Fill Bar
+   - AI Strategy Pipeline step visualizer (`SCAN` -> `EVALUATE` -> `PLAN` -> `SCORE` 
+     -> `EXECUTE` -> `LEARN`)
+3. Battle Log (Top-Left):
+   Collapsible floating panel logging all economic yields, recruitment, combat rounds, 
+   and wall breaches.
+4. AI Disclosure Modal:
+   In-game modal explaining the separation between deterministic simulation rules and 
+   AI reasoning components.
+
+
+18. TECHNOLOGY CHOICES
+--------------------------------------------------------------------------------
+- Vite: Lightning-fast development server, asset bundling, and clean ES module support.
+- Vanilla JavaScript (ES6+): Eliminates virtual DOM overhead, ensuring instantaneous 
+  state mutations and 60 FPS canvas rendering.
+- HTML5 Canvas 2D: Provides complete low-level rendering control for procedural sprites, 
+  particles, and animations.
+- Node.js & Express: Lightweight backend service handling AI API proxying and validation.
+- Swytchcode Runtime & OpenAI: Enables optional structured LLM tactical reasoning.
+- Vanilla CSS: Custom glassmorphism design system with GPU-accelerated transforms and 
+  blur filters.
+
+
+19. ENGINEERING TRADEOFFS
+--------------------------------------------------------------------------------
+1. Deterministic Combat vs. Physics Simulation:
+   We chose deterministic mathematical combat formulas with bounded variance rather than 
+   real-time physics. This guarantees perfectly reproducible combat, zero collision 
+   glitches, and clear tactical readability.
+2. Procedural Canvas Sprites vs. External Raster Assets:
+   We generated sprites directly via Canvas 2D drawing routines. This eliminates asset 
+   loading latency, prevents missing texture bugs, and enables dynamic tier-based visual 
+   mutations.
+3. Hybrid AI Architecture:
+   Implementing both client-side and server-side fallback AI ensures the game runs 
+   flawlessly anywhere, while still providing advanced LLM capabilities when connected.
+
+
+20. TESTING AND VERIFICATION
+--------------------------------------------------------------------------------
+Manual Verification Completed:
+- [x] Full 20-turn campaign played to victory.
+- [x] Town Center destruction verified to trigger Defeat state.
+- [x] Construction queue accurately delays building activation across turns.
+- [x] Directional wall breach bonuses tested and verified in combat logs.
+- [x] AI pipeline visualization verified across all 6 steps during enemy turn.
+- [x] Collapsible AI Drawer and Battle Log tested for smooth collapse/expand states.
+- [x] Fallback AI verified by running with backend offline.
+- [x] Responsive layout verified at standard desktop resolutions.
+
+
+21. LIMITATIONS
+--------------------------------------------------------------------------------
+1. Grid Scope: Map size is fixed at 20x16 tiles to ensure clear tactical focus.
+2. Single Combat Wave per Turn: Enemy attacks resolve once per turn rather than across 
+   continuous real-time skirmishes.
+3. Unit Micro-management: Units are stationed at fortress defense zones rather than 
+   controlled via real-time RTS pathfinding clicks.
+
+
+22. FUTURE EXTENSIONS
+--------------------------------------------------------------------------------
+Architectural hooks already exist to support future Trial 3 Problem Statement 2 (PS2) 
+extensions:
+- Multi-Front Simultaneous Assaults: AI dividing forces to strike North and South 
+  simultaneously.
+- Hero Commander Units: Deployable heroes with aura abilities and activatable spells.
+- Fog of War & Scouting: Deploying scout riders outside fortress walls to reveal enemy 
+  staging camps before attack turns.
+- Custom Campaign Scenario Editor: User-defined wave parameters, custom terrain maps, 
+  and custom AI difficulty curves.
+
+
+23. CONCLUSION
+--------------------------------------------------------------------------------
+Fortress AI delivers a complete, robust, and transparent solution for Trial 3: Strategy 
+& Simulation. By pairing a deterministic game engine with a 6-step adaptive AI strategy 
+pipeline, the game ensures that every player decision carries measurable tactical 
+consequences while providing an engaging, high-stakes strategy defense experience.
+================================================================================

@@ -1,0 +1,253 @@
+================================================================================
+FORTRESS AI — COMPREHENSIVE AI & HUMAN DECISION DISCLOSURE LOG
+Hackathon Trial 3: Strategy & Simulation | Development & Architecture Audit
+================================================================================
+
+Date / Timestamp: 2026-08-23
+Project: Fortress AI — Adaptive Strategy Defense
+Repository: https://github.com/BigO-Debbuger/Trial-3
+
+TABLE OF CONTENTS:
+1. PURPOSE & SCOPE OF THIS DISCLOSURE
+2. COLLABORATION MODEL: HUMAN DEVELOPER + AI ASSISTANT
+3. STRATEGIC DECISIONS TAKEN BY THE HUMAN DEVELOPERS ("US")
+4. ARCHITECTURAL & IMPLEMENTATION DECISIONS TAKEN BY THE AI ASSISTANT ("AI")
+5. SYSTEM-BY-SYSTEM DECISION TRACEABILITY MATRIX
+6. RUNTIME IN-GAME ENEMY AI DISCLOSURE (SIMULATION VS LLM)
+7. SAFETY, VALIDATION, AND BOUNDARY ENFORCEMENT
+8. CONCLUSION & AUDIT SUMMARY
+
+================================================================================
+1. PURPOSE & SCOPE OF THIS DISCLOSURE
+================================================================================
+This document provides a transparent, auditable breakdown of all decisions made 
+during the conception, architecture, design, and implementation of Fortress AI. 
+
+It explicitly delineates:
+- What decisions and parameters were mandated by the human engineering team ("Us").
+- What technical designs, algorithms, code architectures, and mathematical models 
+  were proposed and implemented by the AI Assistant ("AI").
+- How the in-game runtime Enemy AI operates, separating probabilistic LLM reasoning 
+  from strict deterministic game-engine mechanics.
+
+================================================================================
+2. COLLABORATION MODEL: HUMAN DEVELOPER + AI ASSISTANT
+================================================================================
+Fortress AI was engineered through a human-in-the-loop pair-programming paradigm:
+
+- Human Role (Architect / Director / Product Owner):
+  Defined the problem domain, specified functional constraints, enforced Trial 3 
+  hackathon criteria, critiqued visual layouts, identified usability bottlenecks, 
+  and dictated high-level design pivots.
+
+- AI Assistant Role (Lead Implementer / Systems Engineer):
+  Synthesized requirements into full-stack modular architecture, wrote all game 
+  systems, derived mathematical combat and economy balance formulas, implemented 
+  the procedural graphics rendering pipeline, constructed the 6-stage AI strategy 
+  pipeline, and performed rigorous schema validation.
+
+================================================================================
+3. STRATEGIC DECISIONS TAKEN BY THE HUMAN DEVELOPERS ("US")
+================================================================================
+The human engineering team made all foundational project decisions, high-level 
+rules, and major visual/tactical directives:
+
+3.1 Problem Domain & Hackathon Target Selection
+- Chose "Trial 3: Strategy & Simulation" as the hackathon track.
+- Mandated the core theme: A medieval fortress defense simulation where player 
+  choices have direct, measurable consequences against an evolving AI adversary.
+
+3.2 Core Feature Set & Constraints
+- Mandated a 2D top-down / third-person tactical isometric grid perspective.
+- Enforced a discrete turn-based game loop over 20 turns rather than real-time RTS.
+- Mandated a 4-tier resource economy: Gold, Wood, Stone, and Food.
+- Mandated structural durability, multi-tier upgrades (3 tiers), and directional 
+  defenses (North, South, East, West walls).
+- Required player military recruitment (Swordsmen, Archers, Knights) from Barracks.
+- Mandated that the Town Center is the central objective whose destruction triggers 
+  instant Defeat.
+
+3.3 UI Layout Overhaul Directive
+- Identified a major usability flaw in early prototypes where side panels (Battle 
+  Log and Enemy Intelligence) occupied 50%+ of screen width in a rigid 3-column grid, 
+  squishing the game map.
+- Issued the directive for a major UI layout overhaul:
+  * Game canvas (map) must occupy 75-80% of the viewport as the primary visual focus.
+  * Right-hand Enemy Intelligence panel must become a collapsible slide-in drawer.
+  * Battle Log must become a compact, collapsible floating panel in the top-left.
+  * A compact persistent Mini-HUD must be placed in the top-right to display live AI 
+    tactical telemetry without opening the full drawer.
+  * Non-intrusive HUD phase banners instead of full-screen blocking modals.
+
+3.4 AI Architecture Mandate
+- Specified the 6-step cognitive loop for the adversary:
+  SCAN -> EVALUATE -> PLAN -> SCORE -> EXECUTE -> LEARN.
+- Mandated strict separation: AI reasoning can choose strategy and attack vectors, 
+  but CANNOT directly modify game state, spawn free resources, or deal arbitrary damage.
+- Required full offline fallback capability: The game must be 100% playable without 
+  an internet connection or external API keys.
+
+3.5 Technology Stack Selection
+- Selected Vite + Vanilla JavaScript (ES6+ Modules) for zero-framework frontend speed.
+- Selected HTML5 Canvas 2D for high-performance custom graphics.
+- Selected Node.js + Express for the AI execution server.
+- Selected Swytchcode + OpenAI for optional external LLM tactical reasoning.
+
+================================================================================
+4. ARCHITECTURAL & IMPLEMENTATION DECISIONS TAKEN BY THE AI ASSISTANT ("AI")
+================================================================================
+The AI Assistant designed and implemented the concrete software architecture, 
+algorithms, mathematical formulas, and rendering systems:
+
+4.1 Reactive State Management Architecture (`src/game/GameState.js`)
+- AI Decision: Implemented a centralized single-source-of-truth store with a 
+  lightweight Publish/Subscribe event emitter (`on`, `off`, `emit`).
+- Rationale: Avoided heavy state libraries (Redux, MobX), achieving zero-latency 
+  state synchronization between game systems, canvas renderer, and DOM HUD.
+- State Serialization: Created the `toAISnapshot()` method, compressing the entire 
+  active game state into an optimal JSON payload for AI evaluation.
+
+4.2 Flexible Overlay & Drawer CSS Layout (`src/styles/main.css`)
+- AI Decision: Replaced the rigid `grid-template-columns: 280px 1fr 300px` layout 
+  with a full-screen flex column overlay (`pointer-events: none`).
+- AI Decision: Extracted `#right-panel` completely outside the HUD overlay, positioning 
+  it as a fixed slide-in drawer with GPU-accelerated `transform: translateX(100%)` 
+  and smooth cubic-bezier transitions.
+- AI Decision: Engineered floating UI components (`#left-panel`, `#ai-mini-hud`) with 
+  `pointer-events: auto` allowing full click-through to the canvas in open areas.
+
+4.3 Deterministic Combat & Damage Formulas (`src/game/CombatSystem.js`)
+- AI Decision: Formulated the asymptotic armor damage reduction equation:
+  EffectiveDamage = max(1, RawDamage * (100 / (100 + Armor)))
+- AI Decision: Designed the 3-tier upgrade multiplier scaling `[1.0, 1.4, 1.9]` and 
+  bounded combat variance `[0.85, 1.15]` to maintain strategic consistency while 
+  providing organic combat micro-variance.
+- AI Decision: Formulated the 3-phase combat resolution order:
+  1. Tower Auto-Fire (Priority: Siege -> Melee -> Ranged; Cannon 40% splash).
+  2. Garrison Interception (Unit matchup multipliers: Knight vs Siege 1.4x, etc.).
+  3. Structural Assault (Siege deals 2.5x vs Walls; Wall Breach applies +50% bonus).
+
+4.4 Multi-Factor AI Utility Scoring Algorithm (`src/ai/EnemyAI.js` & `server/ai/FallbackAI.js`)
+- AI Decision: Derived the multi-factor weighted utility scoring formula:
+  Score = (Weakness * 3.0) + (ExpectedDamage * 2.0) + (ResourceValue * 1.5) 
+        + (Accessibility * 1.0) - (EstimatedLosses * 2.5) 
+        + (AdaptationBonus / (RecentUses + 1)) - (Failures * 1.5)
+- AI Decision: Dynamic Weight Adaptation in `EnemyAI.learn()`:
+  * On Attack Success: Increases target weakness weight by +5% and expected damage by +2%.
+  * On Attack Failure: Increases exploration bonus by +10% and loss penalty by +5%, 
+    forcing the AI to pivot away from heavily fortified sectors on subsequent turns.
+
+4.5 Procedural Canvas Sprite System (`src/renderer/SpriteSystem.js`)
+- AI Decision: Built a pure programmatic vector sprite generator using HTML5 Canvas 
+  2D paths instead of loading external raster PNGs.
+- Rationale: Guarantees zero asset loading latency, zero HTTP 404 texture errors, 
+  and allows dynamic visual tier mutations (e.g., stone battlements, glowing cannon 
+  metal) based directly on building level numbers.
+
+4.6 Particle & Animation Engine (`src/renderer/ParticleSystem.js`, `AnimationSystem.js`)
+- AI Decision: Implemented an object-pooled particle emitter handling 4 particle types:
+  'explosion', 'smoke', 'debris', 'spark'.
+- AI Decision: Programmed parabolic Bezier trajectory math for tower arrow and 
+  cannonball flight arcs.
+- AI Decision: Added exponential decay screen-shake on structural destruction.
+
+4.7 Strict Schema Validation & Sanitization Layer (`server/ai/AIExecutionService.js`)
+- AI Decision: Implemented strict post-processing sanitization for LLM outputs:
+  * Strategy Whitelist Validation: Defaults to `'north_assault'` if unknown.
+  * Target Clamping: Clamps target strictly to `['north', 'south', 'east', 'west']`.
+  * Unit Mix Normalization: Clamps values between 0.0 and 1.0 and enforces that 
+    the sum of `enemy_melee + enemy_ranged + enemy_siege` equals exactly 1.0.
+
+================================================================================
+5. SYSTEM-BY-SYSTEM DECISION TRACEABILITY MATRIX
+================================================================================
+
++-----------------------+-----------------------------+-----------------------------+
+| System Area           | Decisions Taken By Human    | Decisions Taken By AI       |
++-----------------------+-----------------------------+-----------------------------+
+| Game Concept & Rules  | • 20-turn survival goal     | • Concrete turn phase order |
+|                       | • 4 resources (G/W/S/F)     | • Base income & cap values  |
+|                       | • Town Center protection    | • Turn 3 invasion start     |
++-----------------------+-----------------------------+-----------------------------+
+| UI & Layout           | • 80% map viewport focus    | • Flex column HUD layout    |
+|                       | • Collapsible right drawer  | • CSS translateX drawer     |
+|                       | • Top-left mini battle log  | • Real-time Mini-HUD dots   |
+|                       | • Top-right Mini AI HUD     | • Glassmorphism theme       |
++-----------------------+-----------------------------+-----------------------------+
+| Combat Engine         | • Directional wall breaches | • Armor reduction curve     |
+|                       | • Tower auto-fire mechanics | • 3-phase combat sequence   |
+|                       | • Unit garrison counters    | • 40% cannon splash math    |
++-----------------------+-----------------------------+-----------------------------+
+| AI Strategy Pipeline  | • 6-stage cognitive loop    | • Utility scoring equations |
+|                       | • Memory of past attacks    | • Weight learning multipliers|
+|                       | • Offline fallback mandate  | • State snapshot format     |
++-----------------------+-----------------------------+-----------------------------+
+| Backend & Integration | • Express + Swytchcode      | • OpenAI JSON schema prompt |
+|                       | • Optional LLM reasoning    | • Sanitization & whitelist  |
+|                       | • Environment variable auth | • FallbackAI parity engine  |
++-----------------------+-----------------------------+-----------------------------+
+| Graphics & Rendering  | • 2D Canvas tactical view   | • Procedural sprite paths   |
+|                       | • Visible projectiles & FX  | • Particle physics & shake  |
+|                       | • Placement ghost preview   | • 60 FPS requestAnimLoop    |
++-----------------------+-----------------------------+-----------------------------+
+
+================================================================================
+6. RUNTIME IN-GAME ENEMY AI DISCLOSURE (SIMULATION VS LLM)
+================================================================================
+To ensure complete academic and hackathon integrity, here is the exact breakdown 
+of how the in-game Enemy AI operates at runtime:
+
+6.1 Where Probabilistic AI / LLM Reasoning is Used:
+- Location: `server/ai/AIExecutionService.js` (invoking OpenAI GPT-4o-mini via Swytchcode).
+- Function: Strategic vector selection and high-level unit deployment formulation.
+- Process: Receives the game state snapshot, assesses defense distribution, and 
+  returns a high-level strategic directive (e.g., "Attack West Wall with heavy siege 
+  because North and East have double Archer Towers").
+
+6.2 Where 100% Deterministic Engine Logic is Used:
+- Location: `src/game/CombatSystem.js`, `src/game/BuildingSystem.js`, `src/game/ResourceSystem.js`.
+- Function: All mechanical game outcomes:
+  * Resource income addition and deduction.
+  * Building placement legality and collision detection.
+  * Construction queue decrementing.
+  * Hitpoint deduction and armor mitigation formulas.
+  * Wall breach state triggers.
+  * Win and Loss condition evaluation.
+
+6.3 Where Deterministic Scoring AI is Used:
+- Location: `src/ai/EnemyAI.js` (Client-side) and `server/ai/FallbackAI.js` (Server-side).
+- Function: If LLM is disabled or offline, candidate strategies are scored using the 
+  mathematical utility equations, guaranteeing seamless gameplay without external APIs.
+
+================================================================================
+7. SAFETY, VALIDATION, AND BOUNDARY ENFORCEMENT
+================================================================================
+Strict architectural boundaries prevent AI hallucination or arbitrary state manipulation:
+
+1. One-Way State Flow:
+   The LLM never has access to mutable game state objects or engine execution methods. 
+   It receives a serialized read-only JSON snapshot and outputs a suggested strategy.
+
+2. Sanitization Pipeline:
+   All strategy suggestions pass through `AIExecutionService._validateStrategy()`. Any 
+   illegal property, out-of-bounds target direction, or unnormalized unit ratio is 
+   sanitized or discarded before reaching the `TurnManager`.
+
+3. Deterministic Combat Authority:
+   The `CombatSystem` computes all damage, casualties, and breaches. The AI cannot 
+   declare "I dealt 500 damage"; it can only deploy units into the deterministic 
+   combat resolution engine.
+
+================================================================================
+8. CONCLUSION & AUDIT SUMMARY
+================================================================================
+Fortress AI represents a collaborative engineering achievement:
+- The Human Developers established the product vision, Trial 3 requirements, UI/UX 
+  layout directives, and core gameplay rules.
+- The AI Assistant designed the modular software architecture, derived the underlying 
+  mathematical formulas, programmed the procedural graphics and animation systems, 
+  implemented the 6-step AI strategy pipeline, and ensured strict deterministic safety.
+
+The result is a robust, responsive, and tactically challenging strategy game that 
+demonstrates clear player consequence and transparent, adaptive AI decision-making.
+================================================================================
