@@ -2,7 +2,7 @@
 // Handles combat resolution between enemy attacks and player defenses
 
 import { BUILDINGS, BUILDING_TYPES } from '../data/buildings.js';
-import { PLAYER_UNITS, ENEMY_UNITS } from '../data/units.js';
+import { PLAYER_UNITS, PLAYER_UNIT_TYPES, ENEMY_UNITS, ENEMY_UNIT_TYPES } from '../data/units.js';
 import { COMBAT, AI_CONFIG } from '../data/balancing.js';
 
 export class CombatSystem {
@@ -308,15 +308,20 @@ export class CombatSystem {
   }
 
   /**
-   * Reinforce enemy army each turn
+   * Reinforce enemy army each turn (with strategic consequence scaling)
    */
   reinforceEnemy() {
     const turn = this.state.turn;
-    const scaling = 1 + (turn * 0.1); // 10% stronger each turn
+    let scaling = 1 + (turn * 0.1); // 10% stronger each turn
+
+    // Apply strategic penalties from player offensive conquests
+    const reinfPenalty = this.state.enemyBase?.modifiers?.reinforcementPenalty || 0;
+    const incomePenalty = this.state.enemyBase?.modifiers?.incomePenalty || 0;
+    scaling *= Math.max(0.25, 1.0 - (reinfPenalty * 0.6 + incomePenalty * 0.4));
 
     for (const [type, rate] of Object.entries(AI_CONFIG.REINFORCEMENT_RATE)) {
       const reinforcements = Math.floor(rate * scaling);
-      if (reinforcements > 0 || (rate > 0 && turn % Math.ceil(1 / rate) === 0)) {
+      if (reinforcements > 0 || (rate > 0 && turn % Math.ceil(1 / Math.max(0.1, rate)) === 0)) {
         const actual = Math.max(reinforcements, rate >= 1 ? 1 : 0);
         this.state.enemyArmy[type] = (this.state.enemyArmy[type] || 0) + actual;
       }
@@ -331,5 +336,154 @@ export class CombatSystem {
       }
     }
     this.state.enemyTotalStrength = strength;
+  }
+
+  /**
+   * Resolve a player offensive assault on an enemy base target
+   * @param {Object} attackSummary - Deployed player forces and route setup
+   * @param {Object} aiDefense - AI defensive response and defender deployment
+   * @returns {Object} Comprehensive battle report
+   */
+  resolvePlayerAttack(attackSummary, aiDefense) {
+    const target = this.state.getEnemyTarget(attackSummary.target.id) || attackSummary.target;
+    const targetId = target.id;
+
+    // 1. Calculate raw player offensive power across routes
+    let totalAssaultDamage = 0;
+    const playerLossesByType = {
+      [PLAYER_UNIT_TYPES.WARRIOR]: 0,
+      [PLAYER_UNIT_TYPES.ARCHER]: 0,
+      [PLAYER_UNIT_TYPES.DEFENDER]: 0,
+      [PLAYER_UNIT_TYPES.SIEGE]: 0,
+    };
+
+    // Route calculations
+    for (const [routeName, units] of Object.entries(this.state.offensiveState.routes || {})) {
+      for (const [unitType, count] of Object.entries(units || {})) {
+        if (count <= 0) continue;
+        const def = PLAYER_UNITS[unitType];
+        if (!def) continue;
+
+        let dmgPerUnit = def.damage;
+
+        // Siege multiplier vs structures
+        if (unitType === PLAYER_UNIT_TYPES.SIEGE) {
+          dmgPerUnit *= (def.structureDamageBonus || 2.2);
+        }
+
+        // Route bonus
+        if (routeName === 'north' && unitType === PLAYER_UNIT_TYPES.ARCHER) dmgPerUnit *= 1.25;
+        if (routeName === 'center' && unitType === PLAYER_UNIT_TYPES.SIEGE) dmgPerUnit *= 1.35;
+        if (routeName === 'south' && unitType === PLAYER_UNIT_TYPES.WARRIOR) dmgPerUnit *= 1.25;
+
+        // Outer gate breach vulnerability bonus
+        if (this.state.enemyBase?.modifiers?.vulnerabilityBonus > 0 && targetId === 'command_center') {
+          dmgPerUnit *= (1 + this.state.enemyBase.modifiers.vulnerabilityBonus);
+        }
+
+        const variance = COMBAT.RANDOM_VARIANCE_MIN +
+          Math.random() * (COMBAT.RANDOM_VARIANCE_MAX - COMBAT.RANDOM_VARIANCE_MIN);
+        totalAssaultDamage += count * dmgPerUnit * variance;
+      }
+    }
+
+    // 2. AI Defensive Multipliers & Defender Absorption
+    const defenseMultiplier = aiDefense.structureDefenseMultiplier || 1.0;
+    const baseArmor = target.baseArmor || 10;
+    const effectiveArmor = Math.max(2, baseArmor * defenseMultiplier);
+
+    // Watchtower crossfire penalty if watchtower is still active
+    const watchtowerActive = this.state.getEnemyTarget('watchtower')?.status !== 'destroyed';
+    if (watchtowerActive && targetId !== 'watchtower') {
+      totalAssaultDamage *= 0.88; // 12% damage reduction from suppression fire
+    }
+
+    // Effective structural damage
+    const netStructureDamage = Math.max(15, totalAssaultDamage * (100 / (100 + effectiveArmor)));
+
+    // 3. AI Defender Counter-Attack & Player Casualties
+    let enemyCounterDamage = 0;
+    const enemyLossesByType = {
+      enemy_melee: 0,
+      enemy_ranged: 0,
+      enemy_siege: 0,
+    };
+
+    const defenders = aiDefense.defenders || { enemy_melee: 3, enemy_ranged: 2, enemy_siege: 0 };
+    for (const [defType, count] of Object.entries(defenders)) {
+      const defData = ENEMY_UNITS[defType];
+      if (!defData || count <= 0) continue;
+
+      const counterMultiplier = aiDefense.counterDamageMultiplier || 1.0;
+      const dmg = count * defData.damage * counterMultiplier * (0.85 + Math.random() * 0.3);
+      enemyCounterDamage += dmg;
+
+      // Calculate defender casualties based on player assault ferocity
+      const defenderKilled = Math.min(count, Math.floor(count * (netStructureDamage / (target.maxHp * 0.7))));
+      enemyLossesByType[defType] = defenderKilled;
+    }
+
+    // 4. Distribute casualties to player attacking units
+    let remainingCounterDmg = enemyCounterDamage;
+    const deployed = attackSummary.deployedCounts;
+
+    // Defenders absorb first, then Warriors, then Archers, then Siege
+    const casualtyOrder = [
+      PLAYER_UNIT_TYPES.DEFENDER,
+      PLAYER_UNIT_TYPES.WARRIOR,
+      PLAYER_UNIT_TYPES.ARCHER,
+      PLAYER_UNIT_TYPES.SIEGE,
+    ];
+
+    for (const unitType of casualtyOrder) {
+      const count = deployed[unitType] || 0;
+      if (count <= 0 || remainingCounterDmg <= 0) continue;
+      const uDef = PLAYER_UNITS[unitType];
+      const hpPerUnit = uDef.hp + uDef.armor * 2;
+      const unitsLost = Math.min(count, Math.floor(remainingCounterDmg / hpPerUnit));
+      playerLossesByType[unitType] = unitsLost;
+      remainingCounterDmg -= unitsLost * hpPerUnit;
+    }
+
+    // 5. Apply Damage to Enemy Target
+    const damageResult = this.state.damageEnemyTarget(targetId, netStructureDamage);
+
+    // 6. Update Game Stats
+    const playerTotalLosses = Object.values(playerLossesByType).reduce((a, b) => a + b, 0);
+    const enemyTotalLosses = Object.values(enemyLossesByType).reduce((a, b) => a + b, 0);
+
+    this.state.stats.damageDealt += Math.round(netStructureDamage);
+    this.state.stats.enemiesKilled += enemyTotalLosses;
+
+    // Log the offensive outcome
+    this.state.log(
+      `⚔️ [BATTLE REPORT] Dealt ${Math.round(netStructureDamage)} damage to ${target.name}. Losses: Player -${playerTotalLosses}, Enemy -${enemyTotalLosses}.`,
+      damageResult.destroyed ? 'player' : 'neutral'
+    );
+
+    return {
+      targetId: target.id,
+      targetName: target.name,
+      targetSubtitle: target.subtitle,
+      targetIcon: target.icon,
+      playerForceDeployed: { ...deployed },
+      aiDefense: {
+        strategy: aiDefense.strategy,
+        strategyName: aiDefense.strategyName,
+        icon: aiDefense.icon,
+        reason: aiDefense.reason,
+        source: aiDefense.source || 'llm',
+      },
+      targetDamageTaken: Math.round(netStructureDamage),
+      targetRemainingHp: Math.round(damageResult.target?.hp || 0),
+      targetMaxHp: target.maxHp,
+      targetDestroyed: damageResult.destroyed,
+      playerLossesByType,
+      playerTotalLosses,
+      enemyLossesByType,
+      enemyTotalLosses,
+      consequence: damageResult.destroyed ? target.consequence : (target.hp < target.maxHp * 0.5 ? 'Severe structural damage sustained.' : 'Defensive perimeter holding.'),
+      aiAdaptation: `Enemy AI analyzed assault pattern; updated defensive priority for future incursions.`,
+    };
   }
 }

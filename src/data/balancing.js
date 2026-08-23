@@ -2,44 +2,47 @@
 // All tunable game parameters in one place
 
 export const GAME_CONFIG = {
+  // Demo mode enabled for frictionless judging & full feature access
+  DEMO_MODE: true,
+
   // Turn settings
   MAX_TURNS: 20,
-  DEMO_START_TURN: 7,
+  DEMO_START_TURN: 1,
 
-  // Starting resources
+  // Starting resources (Generous for seamless PS2 demonstration)
   STARTING_RESOURCES: {
-    gold: 800,
-    wood: 500,
-    stone: 400,
-    food: 300,
+    gold: 2400,
+    wood: 1800,
+    stone: 1500,
+    food: 1200,
   },
 
   // Base resource generation per turn (before buildings)
   BASE_INCOME: {
-    gold: 25,
-    wood: 15,
-    stone: 10,
-    food: 15,
+    gold: 45,
+    wood: 30,
+    stone: 20,
+    food: 25,
   },
 
   // Resource caps (before storage buildings)
   BASE_RESOURCE_CAP: {
-    gold: 2000,
-    wood: 1500,
-    stone: 1500,
-    food: 1000,
+    gold: 5000,
+    wood: 4000,
+    stone: 4000,
+    food: 3000,
   },
 
   // Population
-  BASE_POPULATION: 10,
-  MAX_POPULATION: 50,
+  BASE_POPULATION: 50,
+  MAX_POPULATION: 80,
 
   // Map dimensions (grid cells)
   MAP_COLS: 20,
   MAP_ROWS: 16,
   CELL_SIZE: 48,
 
-  // Village area (center of map)
+  // Village area (center of map for player fortress)
   VILLAGE_BOUNDS: {
     minCol: 5,
     maxCol: 14,
@@ -59,43 +62,39 @@ export const GAME_CONFIG = {
 // ─── Combat Formulas ───────────────────────────────────────
 export const COMBAT = {
   // damage = baseDamage × levelMultiplier × targetModifier × randomVariance
-  LEVEL_MULTIPLIER: [1.0, 1.4, 1.9],  // Level 1, 2, 3
+  LEVEL_MULTIPLIER: [1.0, 1.4, 1.9],
   RANDOM_VARIANCE_MIN: 0.85,
   RANDOM_VARIANCE_MAX: 1.15,
 
   // Armor damage reduction: effectiveDamage = damage × (100 / (100 + armor))
   ARMOR_FORMULA_BASE: 100,
 
-  // Wall breach threshold (HP = 0)
-  WALL_BREACH_BONUS_DAMAGE: 1.5,  // Units deal more damage once wall is breached
+  // Wall breach threshold
+  WALL_BREACH_BONUS_DAMAGE: 1.5,
 
-  // Tower auto-fire: towers fire at nearest enemy each attack phase
+  // Tower auto-fire priority
   TOWER_FIRE_PRIORITY: ['enemy_siege', 'enemy_melee', 'enemy_ranged'],
 };
 
 // ─── AI Difficulty Scaling ───────────────────────────────────────
 export const AI_CONFIG = {
-  // Enemy resource generation per turn (scales with turns)
   ENEMY_BASE_INCOME: {
-    gold: 200,
-    reinforcements: 3,  // new units per turn
+    gold: 250,
+    reinforcements: 3,
   },
 
-  // Enemy starts with these units
   STARTING_ENEMY_ARMY: {
-    enemy_melee: 6,
-    enemy_ranged: 3,
-    enemy_siege: 1,
+    enemy_melee: 12,
+    enemy_ranged: 8,
+    enemy_siege: 3,
   },
 
-  // Reinforcement rates per turn
   REINFORCEMENT_RATE: {
     enemy_melee: 2,
     enemy_ranged: 1,
-    enemy_siege: 0.5,  // 1 every 2 turns
+    enemy_siege: 0.5,
   },
 
-  // Strategy weights
   STRATEGY_WEIGHTS: {
     targetWeakness: 3.0,
     expectedDamage: 2.0,
@@ -105,19 +104,15 @@ export const AI_CONFIG = {
     adaptationBonus: 2.0,
   },
 
-  // AI attack starts from turn 3
   FIRST_ATTACK_TURN: 3,
+  MEMORY_TURNS: 5,
 
-  // AI learns from previous attacks
-  MEMORY_TURNS: 5,  // remembers last 5 attacks
-
-  // Confidence thresholds
   CONFIDENCE_HIGH: 0.75,
   CONFIDENCE_MEDIUM: 0.5,
   CONFIDENCE_LOW: 0.3,
 };
 
-// ─── Predefined Attack Strategies ───────────────────────────────────────
+// ─── Predefined Defensive Attack Strategies ──────────────────────────
 export const STRATEGIES = {
   EAST_WALL_BREACH: {
     id: 'east_wall_breach',

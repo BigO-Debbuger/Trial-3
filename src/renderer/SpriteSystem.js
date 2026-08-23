@@ -434,4 +434,256 @@ export class SpriteSystem {
       ctx.stroke();
     }
   }
+
+  // ─── PS2 Enemy Empire Structures ───
+
+  drawEnemyStructure(ctx, x, y, size, targetId, status, time) {
+    const pad = size * 0.08;
+    const s = size - pad * 2;
+
+    ctx.save();
+    ctx.translate(x + pad, y + pad);
+
+    if (status === 'destroyed') {
+      this._drawRuins(ctx, s, time);
+      ctx.restore();
+      return;
+    }
+
+    switch (targetId) {
+      case 'command_center':
+        this._drawEnemyStronghold(ctx, s, time);
+        break;
+      case 'gold_mine':
+        this._drawEnemyGoldMine(ctx, s, time);
+        break;
+      case 'barracks':
+        this._drawEnemyBarracks(ctx, s, time);
+        break;
+      case 'watchtower':
+        this._drawEnemyWatchtower(ctx, s, time);
+        break;
+      case 'resource_depot':
+        this._drawEnemySupplyDepot(ctx, s, time);
+        break;
+      case 'wall_outpost':
+        this._drawEnemyCitadelGate(ctx, s, time);
+        break;
+      default:
+        this._drawDefault(ctx, s, '#8B0000');
+    }
+
+    if (status === 'damaged') {
+      this._drawDamagedEffect(ctx, s, time);
+    }
+
+    ctx.restore();
+  }
+
+  _drawEnemyStronghold(ctx, s, time) {
+    // Dark fortress citadel with crimson spire & glowing core
+    const grad = ctx.createLinearGradient(0, 0, 0, s);
+    grad.addColorStop(0, '#4A0E17');
+    grad.addColorStop(1, '#1A0508');
+    ctx.fillStyle = grad;
+    ctx.fillRect(s * 0.1, s * 0.25, s * 0.8, s * 0.7);
+
+    // Battlements & spires
+    ctx.fillStyle = '#7A1C24';
+    ctx.fillRect(s * 0.05, s * 0.15, s * 0.25, s * 0.8);
+    ctx.fillRect(s * 0.7, s * 0.15, s * 0.25, s * 0.8);
+
+    // Spired Central Keep
+    ctx.fillStyle = '#991B24';
+    ctx.beginPath();
+    ctx.moveTo(s * 0.2, s * 0.25);
+    ctx.lineTo(s * 0.5, -s * 0.1);
+    ctx.lineTo(s * 0.8, s * 0.25);
+    ctx.closePath();
+    ctx.fill();
+
+    // Glowing warlord eye / crest
+    const pulse = 0.6 + 0.4 * Math.sin(time * 0.005);
+    ctx.shadowColor = '#FF2A2A';
+    ctx.shadowBlur = 12 * pulse;
+    ctx.fillStyle = `rgba(255, 42, 42, ${pulse})`;
+    ctx.beginPath();
+    ctx.arc(s * 0.5, s * 0.35, s * 0.12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Iron gate
+    ctx.fillStyle = '#111';
+    ctx.fillRect(s * 0.38, s * 0.6, s * 0.24, s * 0.35);
+  }
+
+  _drawEnemyGoldMine(ctx, s, time) {
+    // Quarry rocks & gold seams
+    ctx.fillStyle = '#3E2723';
+    ctx.beginPath();
+    ctx.moveTo(s * 0.05, s * 0.85);
+    ctx.lineTo(s * 0.3, s * 0.25);
+    ctx.lineTo(s * 0.7, s * 0.2);
+    ctx.lineTo(s * 0.95, s * 0.85);
+    ctx.closePath();
+    ctx.fill();
+
+    // Mine shaft
+    ctx.fillStyle = '#1A110F';
+    ctx.beginPath();
+    ctx.arc(s * 0.5, s * 0.65, s * 0.2, Math.PI, 0);
+    ctx.fill();
+
+    // Wooden scaffolding
+    ctx.strokeStyle = '#8D6E63';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(s * 0.32, s * 0.4, s * 0.36, s * 0.45);
+
+    // Shimmering gold nuggets
+    const shimmer = 0.7 + 0.3 * Math.sin(time * 0.004);
+    ctx.fillStyle = `rgba(255, 215, 0, ${shimmer})`;
+    ctx.beginPath();
+    ctx.arc(s * 0.4, s * 0.75, s * 0.06, 0, Math.PI * 2);
+    ctx.arc(s * 0.6, s * 0.78, s * 0.07, 0, Math.PI * 2);
+    ctx.arc(s * 0.5, s * 0.3, s * 0.05, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  _drawEnemyBarracks(ctx, s, time) {
+    // Military garrison fortress
+    ctx.fillStyle = '#5D101D';
+    ctx.fillRect(s * 0.1, s * 0.35, s * 0.8, s * 0.55);
+
+    // Steel reinforced roof
+    ctx.fillStyle = '#2B2B36';
+    ctx.beginPath();
+    ctx.moveTo(s * 0.05, s * 0.38);
+    ctx.lineTo(s * 0.5, s * 0.12);
+    ctx.lineTo(s * 0.95, s * 0.38);
+    ctx.closePath();
+    ctx.fill();
+
+    // Red war flag waving
+    const wave = Math.sin(time * 0.006) * 3;
+    ctx.strokeStyle = '#D32F2F';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(s * 0.5, s * 0.12);
+    ctx.lineTo(s * 0.5, -s * 0.1);
+    ctx.stroke();
+    ctx.fillStyle = '#E53935';
+    ctx.beginPath();
+    ctx.moveTo(s * 0.5, -s * 0.1);
+    ctx.lineTo(s * 0.75 + wave, -s * 0.06);
+    ctx.lineTo(s * 0.5, -s * 0.02);
+    ctx.closePath();
+    ctx.fill();
+
+    // Crossed weapons emblem
+    ctx.strokeStyle = '#FFC107';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(s * 0.38, s * 0.5);
+    ctx.lineTo(s * 0.62, s * 0.65);
+    ctx.moveTo(s * 0.62, s * 0.5);
+    ctx.lineTo(s * 0.38, s * 0.65);
+    ctx.stroke();
+  }
+
+  _drawEnemyWatchtower(ctx, s, time) {
+    // Dark stone tower
+    ctx.fillStyle = '#37474F';
+    ctx.fillRect(s * 0.25, s * 0.3, s * 0.5, s * 0.65);
+
+    // Ranged lookout platform
+    ctx.fillStyle = '#263238';
+    ctx.fillRect(s * 0.15, s * 0.18, s * 0.7, s * 0.14);
+
+    // Dark crimson conical roof
+    ctx.fillStyle = '#880E4F';
+    ctx.beginPath();
+    ctx.moveTo(s * 0.15, s * 0.18);
+    ctx.lineTo(s * 0.5, -s * 0.05);
+    ctx.lineTo(s * 0.85, s * 0.18);
+    ctx.closePath();
+    ctx.fill();
+
+    // Searchlight / Watch flare
+    const flare = 0.5 + 0.5 * Math.sin(time * 0.005);
+    ctx.fillStyle = `rgba(255, 110, 64, ${flare})`;
+    ctx.beginPath();
+    ctx.arc(s * 0.5, s * 0.24, s * 0.08, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  _drawEnemySupplyDepot(ctx, s, time) {
+    // Reinforced logistics warehouse
+    ctx.fillStyle = '#1B5E20';
+    ctx.fillRect(s * 0.15, s * 0.4, s * 0.7, s * 0.55);
+
+    // Corrugated iron roof
+    ctx.fillStyle = '#455A64';
+    ctx.fillRect(s * 0.1, s * 0.3, s * 0.8, s * 0.12);
+
+    // Stacked supply crates & barrels
+    ctx.fillStyle = '#795548';
+    ctx.fillRect(s * 0.22, s * 0.62, s * 0.25, s * 0.28);
+    ctx.fillRect(s * 0.52, s * 0.62, s * 0.25, s * 0.28);
+    ctx.fillStyle = '#8D6E63';
+    ctx.fillRect(s * 0.36, s * 0.48, s * 0.26, s * 0.22);
+  }
+
+  _drawEnemyCitadelGate(ctx, s, time) {
+    // Heavy fortified gatehouse & iron spikes
+    ctx.fillStyle = '#212121';
+    ctx.fillRect(s * 0.08, s * 0.15, s * 0.25, s * 0.8);
+    ctx.fillRect(s * 0.67, s * 0.15, s * 0.25, s * 0.8);
+
+    // Reinforced iron portcullis arch
+    ctx.strokeStyle = '#B71C1C';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(s * 0.33, s * 0.25, s * 0.34, s * 0.7);
+
+    // Iron bars
+    ctx.strokeStyle = '#757575';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 4; i++) {
+      const bx = s * 0.37 + i * s * 0.08;
+      ctx.beginPath();
+      ctx.moveTo(bx, s * 0.28);
+      ctx.lineTo(bx, s * 0.95);
+      ctx.stroke();
+    }
+  }
+
+  _drawRuins(ctx, s, time) {
+    // Smoking rubble & charred stone
+    ctx.fillStyle = '#1c1c1c';
+    ctx.beginPath();
+    ctx.ellipse(s * 0.5, s * 0.75, s * 0.45, s * 0.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Jagged charred pillars
+    ctx.fillStyle = '#2E2E2E';
+    ctx.fillRect(s * 0.2, s * 0.55, s * 0.15, s * 0.25);
+    ctx.fillRect(s * 0.65, s * 0.6, s * 0.18, s * 0.2);
+
+    // Glowing embers
+    const ember = 0.4 + 0.4 * Math.sin(time * 0.008);
+    ctx.fillStyle = `rgba(255, 87, 34, ${ember})`;
+    ctx.beginPath();
+    ctx.arc(s * 0.35, s * 0.72, s * 0.04, 0, Math.PI * 2);
+    ctx.arc(s * 0.55, s * 0.76, s * 0.05, 0, Math.PI * 2);
+    ctx.arc(s * 0.7, s * 0.68, s * 0.03, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  _drawDamagedEffect(ctx, s, time) {
+    // Fire and smoke plume on damaged structures
+    const flicker = 0.6 + 0.4 * Math.sin(time * 0.01);
+    ctx.fillStyle = `rgba(255, 110, 0, ${flicker * 0.7})`;
+    ctx.beginPath();
+    ctx.arc(s * 0.65, s * 0.3, s * 0.15 * flicker, 0, Math.PI * 2);
+    ctx.fill();
+  }
 }

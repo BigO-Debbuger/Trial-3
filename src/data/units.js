@@ -5,6 +5,7 @@ export const PLAYER_UNIT_TYPES = {
   ARCHER: 'archer',
   WARRIOR: 'warrior',
   DEFENDER: 'defender',
+  SIEGE: 'siege',
 };
 
 export const ENEMY_UNIT_TYPES = {
@@ -16,7 +17,7 @@ export const ENEMY_UNIT_TYPES = {
 export const PLAYER_UNITS = {
   [PLAYER_UNIT_TYPES.ARCHER]: {
     name: 'Archer',
-    description: 'Ranged defender. Effective against melee units.',
+    description: 'Ranged defender & marksman. Effective against enemy infantry.',
     hp: 60,
     damage: 18,
     armor: 2,
@@ -37,7 +38,7 @@ export const PLAYER_UNITS = {
 
   [PLAYER_UNIT_TYPES.WARRIOR]: {
     name: 'Warrior',
-    description: 'Melee fighter. High damage, moderate defense.',
+    description: 'Frontline melee fighter. High damage, versatile assault troop.',
     hp: 100,
     damage: 25,
     armor: 5,
@@ -57,7 +58,7 @@ export const PLAYER_UNITS = {
 
   [PLAYER_UNIT_TYPES.DEFENDER]: {
     name: 'Defender',
-    description: 'Tank unit. High HP and armor, absorbs damage.',
+    description: 'Heavy armor guard. Absorbs enemy counter-attacks.',
     hp: 180,
     damage: 10,
     armor: 12,
@@ -73,6 +74,27 @@ export const PLAYER_UNITS = {
     },
     color: '#66BB6A',
     icon: '🛡️',
+  },
+
+  [PLAYER_UNIT_TYPES.SIEGE]: {
+    name: 'Siege Ram',
+    description: 'Heavy siege weapon. Deals massive damage to enemy structures and gates.',
+    hp: 160,
+    damage: 42,
+    armor: 7,
+    range: 2,
+    attackSpeed: 0.5,
+    cost: { gold: 160, wood: 80, food: 20 },
+    trainTime: 2,
+    populationCost: 2,
+    modifiers: {
+      [ENEMY_UNIT_TYPES.MELEE]: 0.8,
+      [ENEMY_UNIT_TYPES.RANGED]: 1.1,
+      [ENEMY_UNIT_TYPES.SIEGE]: 1.2,
+    },
+    structureDamageBonus: 2.2,
+    color: '#E67E22',
+    icon: '🪵',
   },
 };
 

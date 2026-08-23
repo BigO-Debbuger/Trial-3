@@ -154,4 +154,111 @@ Choose the optimal attack strategy.`;
       targetPriority: [`wall_${target}`, 'archer_tower', 'town_center'],
     };
   }
+
+  /**
+   * PS2: Generate an AI defensive strategy in response to a player attack
+   * @param {Object} attackContext - Information about incoming player assault
+   * @returns {Object} Validated defensive strategy
+   */
+  async generateDefensiveStrategy(attackContext) {
+    if (!this._available) {
+      throw new Error('LLM not available');
+    }
+
+    const prompt = this._buildDefensivePrompt(attackContext);
+
+    try {
+      const { default: OpenAI } = await import('openai');
+      const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const response = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: this._getDefensiveSystemPrompt() },
+          { role: 'user', content: prompt },
+        ],
+        temperature: 0.7,
+        max_tokens: 400,
+        response_format: { type: 'json_object' },
+      });
+
+      const text = response.choices[0]?.message?.content;
+      if (!text) throw new Error('Empty defensive LLM response');
+
+      const parsed = JSON.parse(text);
+      return this._validateDefensiveStrategy(parsed, attackContext);
+    } catch (err) {
+      console.error('Defensive LLM execution error:', err.message);
+      throw err;
+    }
+  }
+
+  _getDefensiveSystemPrompt() {
+    return `You are the Supreme Commander defending the Enemy Empire in Fortress AI against a player invasion.
+Analyze the player's incoming attacking units, target location, and deployment routes, and choose the optimal defensive response.
+
+You MUST respond with a JSON object:
+{
+  "strategy": "HOLD | REINFORCE | COUNTERATTACK | REDIRECT",
+  "defenders": {
+    "enemy_melee": number (1-6),
+    "enemy_ranged": number (1-5),
+    "enemy_siege": number (0-2)
+  },
+  "reason": "string - concise tactical explanation of your defense under 15 words",
+  "confidence": number 0-1
+}
+
+Tactical Guidelines:
+- HOLD: Maximize structural defense (+35% building defense) when fortified behind walls or against low-siege assaults.
+- REINFORCE: Rush emergency garrison defenders to threatened high-value assets (Stronghold, Gold Quarry).
+- COUNTERATTACK: Deploy shock melee units with high counter damage (+75% counter damage) to destroy vulnerable siege rams or archers.
+- REDIRECT: Shift perimeter marksmen to establish crossfire choke points along routes.`;
+  }
+
+  _buildDefensivePrompt(ctx) {
+    return `INCOMING PLAYER ASSAULT:
+Target: ${ctx.target?.name || 'Empire Structure'} (${ctx.target?.id}) - HP: ${ctx.target?.hp}/${ctx.target?.maxHp}
+Assault Power: ${ctx.totalArmyPower || 0} (Siege Power: ${ctx.siegePower || 0})
+Player Attack Force:
+- Warriors: ${ctx.attackForce?.warrior || 0}
+- Archers: ${ctx.attackForce?.archer || 0}
+- Defenders: ${ctx.attackForce?.defender || 0}
+- Siege Rams: ${ctx.attackForce?.siege || 0}
+
+Routes Deployed:
+- North: ${JSON.stringify(ctx.routes?.north || {})}
+- Center: ${JSON.stringify(ctx.routes?.center || {})}
+- South: ${JSON.stringify(ctx.routes?.south || {})}
+
+Available Garrison: ${JSON.stringify(ctx.enemyGarrison || {})}
+
+Select the optimal defensive doctrine.`;
+  }
+
+  _validateDefensiveStrategy(parsed, ctx) {
+    const validStrategies = ['HOLD', 'REINFORCE', 'COUNTERATTACK', 'REDIRECT'];
+    const strategy = validStrategies.includes(parsed.strategy) ? parsed.strategy : 'REINFORCE';
+
+    const defenders = {
+      enemy_melee: Math.max(1, Math.min(6, Math.round(parsed.defenders?.enemy_melee ?? 3))),
+      enemy_ranged: Math.max(1, Math.min(5, Math.round(parsed.defenders?.enemy_ranged ?? 2))),
+      enemy_siege: Math.max(0, Math.min(2, Math.round(parsed.defenders?.enemy_siege ?? 0))),
+    };
+
+    const strategyNames = {
+      HOLD: 'Fortify & Hold Position',
+      REINFORCE: 'Emergency Garrison Reinforcement',
+      COUNTERATTACK: 'Flanking Counter-Strike',
+      REDIRECT: 'Strategic Sector Redirection',
+    };
+
+    return {
+      strategy,
+      strategyName: strategyNames[strategy],
+      defenders,
+      reason: parsed.reason || 'Calculated optimal defensive formation for sector defense.',
+      confidence: Math.max(0.3, Math.min(0.98, parsed.confidence ?? 0.8)),
+    };
+  }
 }

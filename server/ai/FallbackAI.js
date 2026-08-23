@@ -131,4 +131,47 @@ export class FallbackAI {
       reason: 'Fallback strategy — default north assault',
     };
   }
+
+  /**
+   * PS2: Generate deterministic defensive strategy in response to a player attack
+   */
+  generateDefensiveStrategy(attackContext) {
+    const siegeCount = attackContext.attackForce?.siege || 0;
+    const warriorCount = attackContext.attackForce?.warrior || 0;
+    const targetId = attackContext.target?.id;
+
+    if (siegeCount >= 2) {
+      return {
+        strategy: 'COUNTERATTACK',
+        strategyName: 'Flanking Counter-Strike',
+        defenders: { enemy_melee: 5, enemy_ranged: 2, enemy_siege: 0 },
+        reason: 'Heavy siege forces detected; launching shock counter-strike to dismantle siege rams.',
+        confidence: 0.85,
+      };
+    } else if (targetId === 'command_center' || targetId === 'gold_mine') {
+      return {
+        strategy: 'REINFORCE',
+        strategyName: 'Emergency Garrison Reinforcement',
+        defenders: { enemy_melee: 4, enemy_ranged: 3, enemy_siege: 1 },
+        reason: 'Critical asset under assault; dispatching fortified garrison defenders.',
+        confidence: 0.90,
+      };
+    } else if (warriorCount >= 6) {
+      return {
+        strategy: 'REDIRECT',
+        strategyName: 'Strategic Sector Redirection',
+        defenders: { enemy_melee: 3, enemy_ranged: 4, enemy_siege: 0 },
+        reason: 'Large infantry wave incoming; establishing crossfire corridor with archer redeployment.',
+        confidence: 0.80,
+      };
+    } else {
+      return {
+        strategy: 'HOLD',
+        strategyName: 'Fortify & Hold Position',
+        defenders: { enemy_melee: 3, enemy_ranged: 3, enemy_siege: 0 },
+        reason: 'Maintaining entrenched defensive postures behind outer perimeter ramparts.',
+        confidence: 0.75,
+      };
+    }
+  }
 }

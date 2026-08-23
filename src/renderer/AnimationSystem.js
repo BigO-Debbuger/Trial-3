@@ -1,6 +1,6 @@
 // ─── Animation System ───────────────────────────────────────
 // Manages combat animations: projectiles, unit movements, damage numbers,
-// and screen effects. Works with the GameRenderer and ParticleSystem.
+// and screen effects for both PS1 defensive and PS2 offensive warfare.
 
 export class AnimationSystem {
   constructor(renderer, gameState) {
@@ -13,13 +13,22 @@ export class AnimationSystem {
   }
 
   _setupListeners() {
-    // Listen for combat events to queue animations
+    // PS1: Defensive combat resolution
     this.state.on('combat_resolved', (results) => {
       this._animateCombat(results);
     });
 
+    // PS2: Offensive attack launch
+    this.state.on('player_attack_launched', ({ target, routes, summary }) => {
+      this._animateOffensiveLaunch(target, routes, summary);
+    });
+
+    // PS2: Offensive combat resolution
+    this.state.on('offensive_combat_resolved', (report) => {
+      this._animateOffensiveResolution(report);
+    });
+
     this.state.on('building_placed', (building) => {
-      const screen = this.renderer._cellToScreen(building.col, building.row);
       this.renderer.addFloatingText(building.col, building.row, '✅ Built!', '#2ECC71', 16);
     });
 
@@ -43,19 +52,63 @@ export class AnimationSystem {
     });
   }
 
+  _animateOffensiveLaunch(target, routes, summary) {
+    // Fire projectiles from all active routes towards the enemy target
+    const routeOrigins = {
+      north: { col: 8, row: 5 },
+      center: { col: 10, row: 5 },
+      south: { col: 12, row: 5 },
+    };
+
+    for (const [routeName, units] of Object.entries(routes || {})) {
+      const origin = routeOrigins[routeName] || { col: 10, row: 5 };
+      const hasUnits = Object.values(units).some(c => c > 0);
+      if (!hasUnits) continue;
+
+      const hasSiege = (units.siege || 0) > 0;
+      const type = hasSiege ? 'boulder' : 'arrow';
+
+      this.renderer.addCombatAnimation(origin, { col: target.col, row: target.row }, type);
+
+      const screen = this.renderer._cellToScreen(origin.col, origin.row);
+      this.renderer.particles.emit(screen.x, screen.y, 'sparks', 8);
+    }
+  }
+
+  _animateOffensiveResolution(report) {
+    const target = this.state.getEnemyTarget(report.targetId);
+    if (!target) return;
+
+    const screen = this.renderer._cellToScreen(target.col, target.row);
+
+    // Floating damage on target
+    this.renderer.addFloatingText(
+      target.col,
+      target.row,
+      `-${report.targetDamageTaken} HP`,
+      '#FF4444',
+      24
+    );
+
+    // Impact explosion & debris
+    this.renderer.particles.emit(screen.x, screen.y, 'explosion', report.targetDestroyed ? 40 : 20);
+    this.renderer.particles.emit(screen.x, screen.y, 'debris', 15);
+    this.renderer.particles.emit(screen.x, screen.y, 'sparks', 20);
+    this.renderer.shake(report.targetDestroyed ? 25 : 12);
+
+    if (report.targetDestroyed) {
+      this.renderer.addFloatingText(target.col, target.row + 1, `💥 ${target.name.toUpperCase()} DESTROYED!`, '#FFD700', 20);
+    }
+  }
+
   /**
-   * Animate a full combat resolution
+   * Animate a full defensive combat resolution (PS1)
    */
   _animateCombat(results) {
-    // Get the combat log from the combat system
-    const combatLog = this.renderer.combatAnimations || [];
-
-    // Add tower fire animations
     if (results.damageToEnemy > 0) {
       const towers = this.state.getTowers().filter(t => !t.constructing);
       for (const tower of towers) {
         const type = tower.type.includes('cannon') ? 'cannonball' : 'arrow';
-        // Fire towards the enemy spawn direction
         const dir = results.targetDirection || 'north';
         const targetRow = dir === 'north' ? 2 : dir === 'south' ? 14 : 8;
         const targetCol = dir === 'east' ? 18 : dir === 'west' ? 1 : 10;
@@ -66,7 +119,6 @@ export class AnimationSystem {
           type
         );
 
-        // Spawn particles at tower
         const screen = this.renderer._cellToScreen(tower.col, tower.row);
         if (type === 'cannonball') {
           this.renderer.particles.emit(screen.x, screen.y, 'fire', 5);
@@ -75,12 +127,10 @@ export class AnimationSystem {
       }
     }
 
-    // Add damage numbers for player damage
     if (results.damageToPlayer > 0) {
       const dir = results.targetDirection || 'north';
       const vb = { minCol: 5, maxCol: 14, minRow: 4, maxRow: 12 };
 
-      // Place damage numbers near the attacked direction
       let dmgCol, dmgRow;
       switch (dir) {
         case 'north': dmgCol = 10; dmgRow = vb.minRow - 1; break;
@@ -97,16 +147,13 @@ export class AnimationSystem {
         24
       );
 
-      // Screen shake proportional to damage
       this.renderer.shake(Math.min(25, results.damageToPlayer / 10));
 
-      // Fire particles at impact zone
       const impactScreen = this.renderer._cellToScreen(dmgCol, dmgRow);
       this.renderer.particles.emit(impactScreen.x, impactScreen.y, 'fire', 8);
       this.renderer.particles.emit(impactScreen.x, impactScreen.y, 'sparks', 12);
     }
 
-    // Show enemy kills as floating text at spawn zone
     if (results.enemiesKilled > 0) {
       const dir = results.targetDirection || 'north';
       const spawnRow = dir === 'north' ? 1 : dir === 'south' ? 15 : 8;
@@ -120,11 +167,8 @@ export class AnimationSystem {
       );
     }
 
-    // Wall breach effect
     if (results.wallBreached) {
       this.renderer.shake(25);
-
-      // Big explosion at breached wall
       const dir = results.targetDirection || 'north';
       const vb = { minCol: 5, maxCol: 14, minRow: 4, maxRow: 12 };
       let bCol, bRow;

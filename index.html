@@ -1,107 +1,194 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fortress AI — Adaptive Strategy Defense</title>
-    <meta name="description" content="A turn-based strategy game where an AI enemy continuously analyzes your defenses, learns from your decisions, and adapts its attack strategy." />
+    <title>Fortress AI — Two-Sided Strategic War</title>
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <!-- Game Canvas (ALWAYS full viewport, z-index 0) -->
+    <!-- Game Canvas -->
     <canvas id="game-canvas"></canvas>
 
     <!-- ═══════════════════════════════════════════════════════ -->
-    <!-- HUD Overlay — transparent flex layout over the canvas  -->
-    <!-- pointer-events: none so clicks go through to canvas    -->
+    <!-- STRATEGIC MAP HUD OVERLAY (Normal Village View)         -->
     <!-- ═══════════════════════════════════════════════════════ -->
-    <div id="hud-overlay">
-
-      <!-- Top Bar: Turn + Resources -->
+    <div id="ui-overlay">
+      <!-- Top Bar: Resources, Turn & PS2 Demo Preset -->
       <header id="top-bar">
-        <div id="turn-info">
-          <span class="turn-label">TURN</span>
-          <span id="turn-current" class="turn-num">1</span>
-          <span class="turn-sep">/</span>
-          <span id="turn-max" class="turn-num">20</span>
+        <div class="top-left">
+          <div class="turn-counter">
+            <span class="label">TURN</span>
+            <span id="turn-current" class="value">1</span>
+            <span class="max">/<span id="turn-max">20</span></span>
+          </div>
+          <div class="game-phase-badge" id="phase-badge">
+            <span class="phase-dot"></span>
+            <span id="phase-label">STRATEGIC PLANNING</span>
+          </div>
+          <button id="ps2-demo-btn" class="demo-btn" title="Instantly load established Fortress & Army">
+            ⚡ DEMO (T8)
+          </button>
         </div>
-        <div id="resource-bar">
-          <div class="resource-item" data-resource="gold">
+
+        <div class="resources-group">
+          <div class="resource-item" title="Gold — used for units and upgrades">
             <span class="res-icon">💰</span>
-            <span class="res-value" id="res-gold">800</span>
-            <span class="res-income" id="income-gold">(+25)</span>
+            <span id="res-gold" class="res-value">2400</span>
+            <span id="income-gold" class="res-income">(+45)</span>
           </div>
-          <div class="resource-item" data-resource="wood">
+          <div class="resource-item" title="Wood — used for buildings and walls">
             <span class="res-icon">🪵</span>
-            <span class="res-value" id="res-wood">500</span>
-            <span class="res-income" id="income-wood">(+15)</span>
+            <span id="res-wood" class="res-value">1800</span>
+            <span id="income-wood" class="res-income">(+30)</span>
           </div>
-          <div class="resource-item" data-resource="stone">
+          <div class="resource-item" title="Stone — used for towers and wall upgrades">
             <span class="res-icon">🪨</span>
-            <span class="res-value" id="res-stone">400</span>
-            <span class="res-income" id="income-stone">(+10)</span>
+            <span id="res-stone" class="res-value">1500</span>
+            <span id="income-stone" class="res-income">(+20)</span>
           </div>
-          <div class="resource-item" data-resource="food">
+          <div class="resource-item" title="Food — used for recruiting units">
             <span class="res-icon">🍖</span>
-            <span class="res-value" id="res-food">300</span>
-            <span class="res-income" id="income-food">(+15)</span>
+            <span id="res-food" class="res-value">1200</span>
+            <span id="income-food" class="res-income">(+25)</span>
           </div>
         </div>
-        <div id="population-info">
-          <span class="pop-icon">👥</span>
-          <span id="pop-current">0</span>
-          <span class="pop-sep">/</span>
-          <span id="pop-max">10</span>
+
+        <div class="top-right">
+          <div class="population-item" title="Current / Maximum Population">
+            <span class="res-icon">👥</span>
+            <span id="pop-current" class="res-value">34</span>
+            <span class="max">/<span id="pop-max">50</span></span>
+          </div>
+          <button id="ai-info-btn" class="icon-btn" title="AI & Strategic Architecture">
+            🤖
+          </button>
         </div>
       </header>
 
-      <!-- Middle Area — transparent, game canvas shows through -->
-      <div id="hud-middle">
-
-        <!-- Compact Battle Log (top-left floating) -->
+      <!-- Strategic Middle: Left Battle Log & Right Enemy Intel -->
+      <div id="strategic-middle">
+        <!-- Left Panel: Clear, readable Battle Log -->
         <aside id="left-panel">
           <div class="panel-header">
-            <span class="panel-icon">📜</span>
-            <h2>Battle Log</h2>
-            <button id="battle-log-toggle" class="panel-collapse-btn" title="Toggle Battle Log">−</button>
+            <span class="panel-title">📜 BATTLE LOG</span>
+            <button id="battle-log-toggle" class="collapse-btn">−</button>
           </div>
-          <div id="battle-log-container">
-            <div id="battle-log"></div>
-          </div>
+          <div id="battle-log" class="panel-body"></div>
         </aside>
 
-        <!-- AI Mini HUD Card (top-right floating, ~280px) -->
-        <div id="ai-mini-hud">
-          <div class="mini-ai-header">
-            <span>🤖</span> ENEMY AI
+        <!-- Mini AI HUD (Always visible on strategic map) -->
+        <div id="ai-mini-hud" class="mini-hud">
+          <div class="mini-hud-header">
+            <span class="mini-hud-title">⚡ ENEMY INTEL</span>
+            <button id="ai-drawer-open" class="mini-hud-expand" title="Open Full Intelligence Drawer">▶</button>
           </div>
-          <div class="mini-ai-body">
-            <div class="mini-ai-row">
-              <span class="mini-label">Threat</span>
-              <span id="mini-ai-threat" class="mini-value threat-low">LOW</span>
+          <div class="mini-hud-body">
+            <div class="mini-hud-row">
+              <span class="mini-label">THREAT</span>
+              <span id="mini-ai-threat" class="mini-value threat-medium">MEDIUM</span>
             </div>
-            <div class="mini-ai-row">
-              <span class="mini-label">Target</span>
-              <span id="mini-ai-target" class="mini-value">Scanning...</span>
+            <div class="mini-hud-row">
+              <span class="mini-label">OFFENSIVE</span>
+              <span id="mini-ai-strategy" class="mini-value">Preparing...</span>
             </div>
-            <div class="mini-ai-row">
-              <span class="mini-label">Strategy</span>
-              <span id="mini-ai-strategy" class="mini-value">—</span>
+            <div class="mini-hud-row">
+              <span class="mini-label">DEFENSE DOC</span>
+              <span id="mini-ai-defense-doc" class="mini-value">Fortify & Hold</span>
             </div>
-            <div class="mini-ai-row">
-              <span class="mini-label">Confidence</span>
-              <span id="mini-ai-confidence" class="mini-value">—</span>
+            <div class="mini-hud-row">
+              <span class="mini-label">EMPIRE</span>
+              <span id="mini-ai-empire-status" class="mini-value text-gold">6/6 Targets</span>
             </div>
             <div id="mini-pipeline" class="mini-pipeline"></div>
           </div>
-          <button id="ai-drawer-open" class="mini-details-btn" title="View Full AI Intelligence">VIEW AI ▸</button>
         </div>
 
+        <!-- Right Panel: Intelligence Drawer (Collapsible) -->
+        <aside id="right-panel" class="drawer-closed">
+          <div class="panel-header">
+            <span class="panel-title">🧠 ENEMY COMMAND INTEL</span>
+            <button id="ai-drawer-close" class="drawer-close-btn">&times;</button>
+          </div>
+          <div class="panel-body">
+            <div class="intel-section">
+              <div class="section-label">AI STATUS</div>
+              <div id="ai-status-indicator" class="status-ready">Monitoring & Defending</div>
+            </div>
+
+            <div class="intel-section">
+              <div class="section-label">ENEMY EMPIRE TARGETS</div>
+              <div id="enemy-targets-list" class="enemy-targets-summary"></div>
+            </div>
+
+            <div class="intel-section">
+              <div class="section-label">ESTIMATED ENEMY FORCE</div>
+              <div class="force-meter">
+                <div id="force-fill" class="force-fill" style="width: 45%"></div>
+              </div>
+              <div id="enemy-unit-counts" class="unit-badges"></div>
+            </div>
+
+            <div class="intel-section">
+              <div class="section-label">WEAKEST FORTRESS POINT</div>
+              <div id="weak-point-display" class="weak-point"></div>
+            </div>
+
+            <div class="intel-section">
+              <div class="section-label">PREDICTED ATTACK STRATEGY</div>
+              <div id="predicted-strategy" class="predicted-strat">Analyzing...</div>
+              <div class="confidence-bar">
+                <div id="confidence-fill" class="confidence-fill"></div>
+                <span id="confidence-value" class="confidence-text">--%</span>
+              </div>
+            </div>
+
+            <div class="intel-section">
+              <div class="section-label">AI DECISION PIPELINE</div>
+              <div id="pipeline-steps" class="pipeline-list">
+                <div class="pipeline-step" data-step="scan">
+                  <span class="step-num">1</span>
+                  <span class="step-name">Scan Defenses</span>
+                  <span class="step-status"></span>
+                </div>
+                <div class="pipeline-step" data-step="evaluate">
+                  <span class="step-num">2</span>
+                  <span class="step-name">Evaluate Weakness</span>
+                  <span class="step-status"></span>
+                </div>
+                <div class="pipeline-step" data-step="plan">
+                  <span class="step-num">3</span>
+                  <span class="step-name">Generate Attack Plan</span>
+                  <span class="step-status"></span>
+                </div>
+                <div class="pipeline-step" data-step="score">
+                  <span class="step-num">4</span>
+                  <span class="step-name">Score & Validate</span>
+                  <span class="step-status"></span>
+                </div>
+                <div class="pipeline-step" data-step="execute">
+                  <span class="step-num">5</span>
+                  <span class="step-name">Execute Command</span>
+                  <span class="step-status"></span>
+                </div>
+                <div class="pipeline-step" data-step="learn">
+                  <span class="step-num">6</span>
+                  <span class="step-name">Adapt & Learn</span>
+                  <span class="step-status"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
       </div>
 
-      <!-- Bottom Panel: Build Actions -->
+      <!-- Bottom Panel: Strategic Build, Recruitment, and Attack Trigger -->
       <footer id="bottom-panel">
         <div id="build-tabs">
           <button class="build-tab active" data-tab="build">🏗️ Build</button>
@@ -112,80 +199,206 @@
         <div id="build-cards-container">
           <div id="build-cards"></div>
         </div>
-        <button id="end-turn-btn">
-          <span class="btn-icon">⚡</span>
-          <span class="btn-text">END TURN</span>
-        </button>
+        <div class="action-buttons-group">
+          <button id="attack-mode-btn" class="btn-attack">
+            <span class="btn-icon">⚔️</span>
+            <span class="btn-text">ATTACK EMPIRE</span>
+          </button>
+          <button id="end-turn-btn" class="btn-end-turn">
+            <span class="btn-icon">⚡</span>
+            <span class="btn-text">END TURN</span>
+          </button>
+        </div>
       </footer>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════ -->
-    <!-- Enemy Intelligence Drawer — OUTSIDE the HUD overlay    -->
-    <!-- Slides in from the right edge. Default: hidden.        -->
+    <!-- PS2 FULLSCREEN DEDICATED ENEMY ASSAULT HUD OVERLAY      -->
     <!-- ═══════════════════════════════════════════════════════ -->
-    <aside id="right-panel" class="drawer-closed">
-      <div class="drawer-header">
-        <div class="drawer-title-group">
-          <span class="panel-icon">🎯</span>
-          <h2>Enemy Intelligence</h2>
+    <div id="attack-screen-overlay" class="attack-screen-overlay hidden">
+      <!-- Top Attack Command Bar -->
+      <header class="attack-top-bar">
+        <button id="attack-retreat-btn" class="btn-retreat">
+          <span>←</span> RETREAT
+        </button>
+        <div class="attack-target-title">
+          <h2>⚔️ ENEMY STRONGHOLD ASSAULT</h2>
+          <span class="attack-objective-hint">Drop troops into the green deployment zone below!</span>
         </div>
-        <button id="ai-drawer-close" class="drawer-close-btn" title="Close">×</button>
-      </div>
-      <div id="enemy-intel">
-        <div id="ai-status" class="intel-section">
-          <div class="intel-label">AI STATUS</div>
-          <div id="ai-status-indicator" class="status-ready">Monitoring</div>
-        </div>
-        <div id="enemy-strength" class="intel-section">
-          <div class="intel-label">ENEMY FORCE</div>
-          <div id="enemy-force-bar" class="force-bar">
-            <div class="force-fill" id="force-fill"></div>
-          </div>
-          <div id="enemy-unit-counts" class="unit-counts"></div>
-        </div>
-        <div id="weakest-point" class="intel-section">
-          <div class="intel-label">WEAKEST POINT</div>
-          <div id="weak-point-display">Scanning...</div>
-        </div>
-        <div id="predicted-attack" class="intel-section">
-          <div class="intel-label">PREDICTED ATTACK</div>
-          <div id="predicted-strategy">Awaiting intel...</div>
-          <div id="confidence-bar" class="confidence-bar">
-            <div class="confidence-fill" id="confidence-fill"></div>
-            <span id="confidence-value">0%</span>
-          </div>
-        </div>
-        <div id="ai-pipeline" class="intel-section">
-          <div class="intel-label">AI STRATEGY PROCESS</div>
-          <div id="pipeline-steps">
-            <div class="pipeline-step" data-step="scan">SCAN</div>
-            <div class="pipeline-step" data-step="evaluate">EVALUATE</div>
-            <div class="pipeline-step" data-step="plan">PLAN</div>
-            <div class="pipeline-step" data-step="score">SCORE</div>
-            <div class="pipeline-step" data-step="execute">EXECUTE</div>
-            <div class="pipeline-step" data-step="learn">LEARN</div>
-          </div>
+        <button id="attack-finish-btn" class="btn-finish-assault">
+          <span>🔥</span> END ASSAULT
+        </button>
+      </header>
+
+      <!-- Live Assault Combat Event Log (Compact top-left) -->
+      <aside id="assault-event-log" class="assault-event-log">
+        <div class="assault-log-header">ASSAULT EVENTS</div>
+        <div id="assault-log-body" class="assault-log-body"></div>
+      </aside>
+
+      <!-- Live AI Defense Alert Overlay (Top-right) -->
+      <div id="assault-ai-alert" class="assault-ai-alert hidden">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-info">
+          <div class="alert-title">ENEMY DEFENSE ENGAGED</div>
+          <div id="assault-ai-doctrine" class="alert-doctrine">DOCTRINE: HOLD & FORTIFY</div>
+          <div id="assault-ai-reason" class="alert-reason">"Deploying defenders to intercept assault."</div>
         </div>
       </div>
-    </aside>
 
-    <!-- Drawer Edge Toggle Tab (always visible on right edge) -->
-    <button id="ai-drawer-toggle" title="Toggle Enemy AI Intelligence">⚔ ENEMY AI</button>
+      <!-- Bottom Troop Deployment Tray -->
+      <footer class="attack-troop-tray">
+        <div class="tray-label-bar">
+          <span>SELECT TROOP & CLICK BATTLEFIELD TO DROP</span>
+          <span id="tray-deployed-counter" class="deployed-counter">DEPLOYED: 0 TROOPS</span>
+        </div>
+        <div class="troop-cards-row">
+          <div class="troop-tray-card active" data-unit="warrior" id="tray-card-warrior">
+            <div class="tray-card-icon">⚔️</div>
+            <div class="tray-card-info">
+              <span class="tray-card-name">WARRIOR</span>
+              <span class="tray-card-role">Frontline Melee</span>
+            </div>
+            <div class="tray-card-count" id="tray-count-warrior">14</div>
+          </div>
 
-    <!-- Phase Banner (AI Turn overlay) — compact, centered -->
+          <div class="troop-tray-card" data-unit="archer" id="tray-card-archer">
+            <div class="tray-card-icon">🏹</div>
+            <div class="tray-card-info">
+              <span class="tray-card-name">ARCHER</span>
+              <span class="tray-card-role">Ranged Support</span>
+            </div>
+            <div class="tray-card-count" id="tray-count-archer">10</div>
+          </div>
+
+          <div class="troop-tray-card" data-unit="defender" id="tray-card-defender">
+            <div class="tray-card-icon">🛡️</div>
+            <div class="tray-card-info">
+              <span class="tray-card-name">DEFENDER</span>
+              <span class="tray-card-role">Armored Tank</span>
+            </div>
+            <div class="tray-card-count" id="tray-count-defender">6</div>
+          </div>
+
+          <div class="troop-tray-card" data-unit="siege" id="tray-card-siege">
+            <div class="tray-card-icon">🪵</div>
+            <div class="tray-card-info">
+              <span class="tray-card-name">SIEGE RAM</span>
+              <span class="tray-card-role">Structure Breaker</span>
+            </div>
+            <div class="tray-card-count" id="tray-count-siege">4</div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- ENEMY OFFENSIVE INCOMING ALERT MODAL / BANNER           -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div id="enemy-offensive-alert" class="enemy-offensive-alert hidden">
+      <div class="offensive-alert-header">
+        <span class="flashing-alarm">⚠️</span>
+        <div>
+          <h3>ENEMY OFFENSIVE DETECTED!</h3>
+          <span id="offensive-alert-subtitle" class="alert-subtitle">Enemy army launching assault on village perimeter</span>
+        </div>
+      </div>
+      <div class="offensive-alert-details">
+        <div class="alert-row">
+          <span class="k">STRATEGY:</span>
+          <span id="offensive-strategy-name" class="v highlight-gold">North Assault</span>
+        </div>
+        <div class="alert-row">
+          <span class="k">PRIMARY TARGET:</span>
+          <span id="offensive-target-direction" class="v highlight-red">NORTH WALL / TOWERS</span>
+        </div>
+        <div class="alert-row">
+          <span class="k">ATTACKING FORCE:</span>
+          <span id="offensive-force-size" class="v">12 Units</span>
+        </div>
+        <div class="alert-row">
+          <span class="k">TACTICAL REASON:</span>
+          <span id="offensive-reason-text" class="v italic">"Exploiting gap in northern perimeter."</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- PS2 BATTLE REPORT MODAL — After Action Review           -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div id="battle-report-modal" class="modal hidden">
+      <div class="modal-content battle-report-content">
+        <div class="report-header">
+          <span class="report-icon">🏆</span>
+          <div>
+            <h2 id="report-main-title">BATTLE REPORT — OFFENSIVE ASSAULT</h2>
+            <p id="report-target-subtitle" class="subtitle">Assault against Enemy Stronghold</p>
+          </div>
+        </div>
+
+        <div class="report-target-summary">
+          <div class="target-badge-large">
+            <span id="report-target-icon">🏰</span>
+            <span id="report-target-name">Enemy Stronghold</span>
+          </div>
+          <div class="target-hp-delta">
+            <div class="hp-label-group">
+              <span>TARGET INTEGRITY</span>
+              <span id="report-target-hp-text">500 / 1200 HP</span>
+            </div>
+            <div class="hp-progress-bar">
+              <div id="report-target-hp-fill" class="hp-bar-fill" style="width: 41%; background: #e74c3c;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="report-columns">
+          <div class="report-col player-side">
+            <h3 id="report-side-a-title">🗡️ PLAYER FORCES</h3>
+            <div id="report-player-deployed" class="unit-stat-list"></div>
+            <div id="report-player-losses" class="casualty-tally danger">0 Units Fallen</div>
+          </div>
+          <div class="report-col enemy-side">
+            <h3 id="report-side-b-title">🛡️ ENEMY DEFENSIVE DOCTRINE</h3>
+            <div class="doctrine-display">
+              <span id="report-enemy-doctrine-icon">🛡️</span>
+              <span id="report-enemy-doctrine-name">Emergency Garrison</span>
+            </div>
+            <div id="report-enemy-deployed" class="unit-stat-list"></div>
+            <div id="report-enemy-losses" class="casualty-tally success">0 Defenders Slain</div>
+          </div>
+        </div>
+
+        <div class="consequence-box">
+          <div class="consequence-title">⚡ STRATEGIC WORLD CONSEQUENCE</div>
+          <p id="report-consequence-text" class="consequence-desc">Target sustained heavy structural damage.</p>
+        </div>
+
+        <div class="adaptation-box">
+          <div class="adaptation-title">🧠 AI COMMAND ADAPTATION</div>
+          <p id="report-adaptation-text" class="adaptation-desc">AI Commander noted player attack vectors.</p>
+        </div>
+
+        <div class="report-footer">
+          <button id="close-battle-report-btn" class="btn-primary">
+            <span>🏰</span> RETURN TO STRATEGIC MAP
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase Banner (Turn transitions) -->
     <div id="phase-banner" class="hidden">
-      <div class="phase-content">
-        <div class="phase-title" id="phase-title">ENEMY TURN</div>
-        <div class="phase-subtitle" id="phase-subtitle">AI analyzing defenses...</div>
-      </div>
+      <div id="phase-title">ENEMY TURN</div>
+      <div id="phase-subtitle">AI analyzing defenses...</div>
     </div>
 
     <!-- Game Over Modal -->
     <div id="game-over-modal" class="modal hidden">
-      <div class="modal-content game-over-content">
-        <div id="game-over-icon" class="game-over-icon">⚔️</div>
-        <h1 id="game-over-title">DEFEAT</h1>
-        <p id="game-over-message">Your fortress has fallen.</p>
+      <div class="modal-content">
+        <div id="game-over-icon" class="game-over-icon">🏆</div>
+        <h2 id="game-over-title">VICTORY!</h2>
+        <p id="game-over-message">Your fortress survived all enemy assaults!</p>
         <div id="game-over-stats" class="game-over-stats"></div>
         <button id="restart-btn" class="btn-primary">Play Again</button>
       </div>
@@ -195,42 +408,28 @@
     <div id="ai-disclosure-modal" class="modal hidden">
       <div class="modal-content disclosure-content">
         <button class="modal-close" id="close-disclosure">&times;</button>
-        <h1>🤖 AI Disclosure</h1>
-        <div class="disclosure-sections">
-          <div class="disclosure-section">
-            <h2>AI Components</h2>
-            <ul>
-              <li><strong>Strategy Engine:</strong> The enemy AI uses a 6-step pipeline (SCAN → EVALUATE → PLAN → SCORE → EXECUTE → LEARN) to select attack strategies.</li>
-              <li><strong>LLM Integration (Optional):</strong> When connected, OpenAI via Swytchcode provides enhanced strategy reasoning.</li>
-              <li><strong>Adaptive Learning:</strong> The AI remembers previous attack outcomes and adjusts weights to try different strategies when others fail.</li>
-            </ul>
+        <h2>🤖 AI System Architecture</h2>
+        <div class="disclosure-body">
+          <div class="ai-feature-card">
+            <h3>PS1 & PS2 Two-Sided Strategic War</h3>
+            <p>
+              In PS1, an adaptive AI Commander analyzes your defenses and launches strategic assaults.
+              In PS2, you command the offensive war against the Enemy Empire, deploying troops across
+              the battlefield while the Enemy Command executes structured defensive countermeasures via Swytchcode.
+            </p>
           </div>
-          <div class="disclosure-section">
-            <h2>Deterministic Components</h2>
-            <ul>
-              <li><strong>Combat Resolution:</strong> All damage calculations use deterministic formulas with controlled random variance (±15%).</li>
-              <li><strong>Resource System:</strong> Income, costs, and building stats are fixed values.</li>
-              <li><strong>Game Rules:</strong> Turn limits, building placement, and win/loss conditions are fully deterministic.</li>
-            </ul>
-          </div>
-          <div class="disclosure-section">
-            <h2>Swytchcode Role</h2>
-            <p>Swytchcode sits between the game and OpenAI, handling authentication, execution policy, and retries. The LLM never modifies game state directly — all strategies are validated before execution.</p>
+          <div class="ai-feature-card">
+            <h3>Decision Authority & Validation</h3>
+            <p>
+              The LLM only generates structured JSON strategy decisions. All damage, building destruction,
+              and resource consequences are executed by authoritative deterministic engine formulas.
+            </p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Tooltip -->
-    <div id="tooltip" class="hidden">
-      <div class="tooltip-title" id="tooltip-title"></div>
-      <div class="tooltip-body" id="tooltip-body"></div>
-    </div>
-
-    <!-- Settings button -->
-    <button id="settings-btn" title="Settings">⚙️</button>
-    <button id="ai-info-btn" title="AI Disclosure">🤖</button>
-
+    <!-- Main Entry Point -->
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

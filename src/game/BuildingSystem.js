@@ -10,9 +10,6 @@ export class BuildingSystem {
     this.resources = resourceSystem;
   }
 
-  /**
-   * Get building definition
-   */
   getBuildingDef(type) {
     return BUILDINGS[type];
   }
@@ -24,7 +21,7 @@ export class BuildingSystem {
     // Check bounds
     if (col < 0 || col >= this.state.mapCols || row < 0 || row >= this.state.mapRows) return false;
 
-    // Check terrain — can't build on water
+    // Check terrain — cannot build on water
     const terrain = this.state.terrain[row]?.[col];
     if (!terrain || terrain.type === 'water') return false;
 
@@ -32,25 +29,27 @@ export class BuildingSystem {
     const existing = this.state.getBuildingsAt(col, row);
     if (existing.length > 0) return false;
 
-    // Check village bounds for non-wall buildings
     const vb = GAME_CONFIG.VILLAGE_BOUNDS;
-    const isVillage = col >= vb.minCol && col <= vb.maxCol && row >= vb.minRow && row <= vb.maxRow;
+    const isInsideVillage = col >= vb.minCol && col <= vb.maxCol && row >= vb.minRow && row <= vb.maxRow;
+    const isPerimeter = (
+      col >= vb.minCol - 1 && col <= vb.maxCol + 1 &&
+      row >= vb.minRow - 1 && row <= vb.maxRow + 1
+    );
 
     if (type === BUILDING_TYPES.WALL || type === BUILDING_TYPES.GATE) {
-      // Walls go on the edges of the village
-      const isEdge = (
-        (row === vb.minRow - 1 || row === vb.maxRow + 1) && col >= vb.minCol - 1 && col <= vb.maxCol + 1 ||
-        (col === vb.minCol - 1 || col === vb.maxCol + 1) && row >= vb.minRow - 1 && row <= vb.maxRow + 1
-      );
-      if (!isEdge) return false;
-    } else if (type !== BUILDING_TYPES.RESOURCE_CAMP) {
-      // Most buildings must be inside village area
-      if (!isVillage) return false;
+      // Walls & Gates can be placed along perimeter or on outer village boundary
+      if (!isPerimeter) return false;
+    } else if (type === BUILDING_TYPES.RESOURCE_CAMP) {
+      // Resource camps can be in or around village
+      if (!isPerimeter) return false;
+    } else {
+      // Core and military buildings inside village
+      if (!isInsideVillage) return false;
     }
 
     // Check max count
     const buildingDef = BUILDINGS[type];
-    if (buildingDef.maxCount) {
+    if (buildingDef && buildingDef.maxCount) {
       const count = this.state.buildings.filter(b => b.type === type).length;
       if (count >= buildingDef.maxCount) return false;
     }
@@ -67,11 +66,20 @@ export class BuildingSystem {
    */
   getWallDirection(col, row) {
     const vb = GAME_CONFIG.VILLAGE_BOUNDS;
-    if (row <= vb.minRow - 1) return 'north';
-    if (row >= vb.maxRow + 1) return 'south';
-    if (col <= vb.minCol - 1) return 'west';
-    if (col >= vb.maxCol + 1) return 'east';
-    return null;
+    if (row <= vb.minRow) return 'north';
+    if (row >= vb.maxRow) return 'south';
+    if (col <= vb.minCol) return 'west';
+    if (col >= vb.maxCol) return 'east';
+
+    const dNorth = Math.abs(row - vb.minRow);
+    const dSouth = Math.abs(row - vb.maxRow);
+    const dWest = Math.abs(col - vb.minCol);
+    const dEast = Math.abs(col - vb.maxCol);
+    const min = Math.min(dNorth, dSouth, dWest, dEast);
+    if (min === dNorth) return 'north';
+    if (min === dSouth) return 'south';
+    if (min === dWest) return 'west';
+    return 'east';
   }
 
   /**
@@ -109,7 +117,7 @@ export class BuildingSystem {
     if (building.constructing) {
       this.state.log(`🏗️ Started building ${buildingDef.name} (${building.turnsLeft} turns)`, 'player');
     } else {
-      this.state.log(`✅ Built ${buildingDef.name}`, 'player');
+      this.state.log(`✅ Built ${buildingDef.name} ${direction ? `[${direction.toUpperCase()}]` : ''}`, 'player');
       this.resources.recalculateIncome();
       this.resources.recalculateCaps();
       this.resources.recalculatePopulation();
@@ -129,10 +137,10 @@ export class BuildingSystem {
     const buildingDef = BUILDINGS[building.type];
     if (!buildingDef) return false;
 
-    if (building.level >= buildingDef.levels.length) return false; // Max level
+    if (building.level >= buildingDef.levels.length) return false;
     if (building.constructing) return false;
 
-    const nextLevel = buildingDef.levels[building.level]; // 0-indexed, current level is already 1-indexed
+    const nextLevel = buildingDef.levels[building.level];
     if (!nextLevel) return false;
 
     if (!this.resources.spend(nextLevel.cost)) return false;
@@ -192,7 +200,6 @@ export class BuildingSystem {
     const levelData = buildingDef.levels[building.level - 1];
     const armor = levelData.armor || 0;
 
-    // Apply armor reduction
     const effectiveDamage = Math.max(1, damage * (100 / (100 + armor)));
     building.hp = Math.max(0, building.hp - effectiveDamage);
 
@@ -200,10 +207,8 @@ export class BuildingSystem {
       this.state.log(`💥 ${buildingDef.name} destroyed!`, 'enemy');
       this.state.emit('building_destroyed', building);
 
-      // Remove building
       this.state.buildings = this.state.buildings.filter(b => b.id !== buildingId);
 
-      // Check for town center destruction
       if (building.type === BUILDING_TYPES.TOWN_CENTER) {
         this.state.gameResult = 'defeat';
         this.state.phase = 'game_over';
@@ -219,7 +224,7 @@ export class BuildingSystem {
   }
 
   /**
-   * Repair a building (costs resources)
+   * Repair a building
    */
   repairBuilding(buildingId) {
     const building = this.state.getBuilding(buildingId);
