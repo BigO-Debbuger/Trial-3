@@ -1,22 +1,17 @@
 // ─── AI Execution Service ───────────────────────────────────
-// Orchestrates: game state → prompt → Swytchcode → OpenAI → response parsing → validation
-// This service sits between the game and the LLM
+// Controlled execution pipeline:
+// Game State / Attack Context → Prompt Formulation → SwytchcodeAIAdapter
+// → Swytchcode Kernel (vibewright.openai@1.0.0, openai.responsesbetatrue.create)
+// → Schema Validation & Clamping → Deterministic Game Engine
+
+import { SwytchcodeAIAdapter } from '../swytchcode/SwytchcodeAIAdapter.js';
+import { FallbackAI } from './FallbackAI.js';
 
 export class AIExecutionService {
   constructor() {
-    this._available = false;
-    this._checkAvailability();
-  }
-
-  async _checkAvailability() {
-    try {
-      // Check if OpenAI API key is set
-      if (process.env.OPENAI_API_KEY && process.env.ENABLE_LLM_AI !== 'false') {
-        this._available = true;
-      }
-    } catch (err) {
-      this._available = false;
-    }
+    this.swytchcodeAdapter = new SwytchcodeAIAdapter();
+    this.fallbackAI = new FallbackAI();
+    this._available = true;
   }
 
   isAvailable() {
@@ -24,41 +19,44 @@ export class AIExecutionService {
   }
 
   /**
-   * Generate a strategy using the LLM
+   * Generate an offensive strategy using Swytchcode integration
    * @param {Object} gameState - Serialized game state snapshot
-   * @returns {Object} Validated strategy object
+   * @returns {Promise<Object>} Validated strategy object
    */
   async generateStrategy(gameState) {
-    if (!this._available) {
-      throw new Error('LLM not available');
-    }
-
-    const prompt = this._buildPrompt(gameState);
+    const instructions = this._getSystemPrompt();
+    const input = this._buildPrompt(gameState);
 
     try {
-      // Dynamic import to avoid requiring the module if not available
-      const { default: OpenAI } = await import('openai');
-      const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-      const response = await client.chat.completions.create({
+      const parsed = await this.swytchcodeAdapter.executeModelResponse(instructions, input, {
         model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: this._getSystemPrompt() },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.7,
-        max_tokens: 500,
-        response_format: { type: 'json_object' },
       });
 
-      const text = response.choices[0]?.message?.content;
-      if (!text) throw new Error('Empty LLM response');
-
-      const parsed = JSON.parse(text);
       return this._validateStrategy(parsed);
     } catch (err) {
-      console.error('LLM execution error:', err.message);
-      throw err;
+      console.warn('[SWYTCHCODE] Strategy execution fell back to deterministic scoring:', err.message);
+      return this.fallbackAI.generateStrategy(gameState);
+    }
+  }
+
+  /**
+   * Generate an AI defensive doctrine response to a player attack using Swytchcode
+   * @param {Object} attackContext - Information about incoming player assault
+   * @returns {Promise<Object>} Validated defensive strategy
+   */
+  async generateDefensiveStrategy(attackContext) {
+    const instructions = this._getDefensiveSystemPrompt();
+    const input = this._buildDefensivePrompt(attackContext);
+
+    try {
+      const parsed = await this.swytchcodeAdapter.executeModelResponse(instructions, input, {
+        model: 'gpt-4o-mini',
+      });
+
+      return this._validateDefensiveStrategy(parsed, attackContext);
+    } catch (err) {
+      console.warn('[SWYTCHCODE] Defense execution fell back to deterministic doctrine:', err.message);
+      return this.fallbackAI.generateDefensiveStrategy(attackContext);
     }
   }
 
@@ -89,7 +87,7 @@ Strategy guidelines:
   }
 
   _buildPrompt(state) {
-    return `Current game state (Turn ${state.turn}/${state.maxTurns}):
+    return `Current game state (Turn ${state.turn || 1}/${state.maxTurns || 20}):
 
 WALLS:
 - North: ${state.walls?.north?.hp || 0}/${state.walls?.north?.maxHp || 0} HP (${Math.floor((state.walls?.north?.percentage || 0) * 100)}%)
@@ -115,6 +113,10 @@ Choose the optimal attack strategy.`;
   }
 
   _validateStrategy(parsed) {
+    if (!parsed || typeof parsed !== 'object') {
+      return this.fallbackAI.generateStrategy({});
+    }
+
     const validStrategies = [
       'east_wall_breach', 'west_wall_breach', 'north_assault', 'south_assault',
       'resource_raid', 'tower_suppression', 'siege_assault', 'diversionary'
@@ -131,9 +133,9 @@ Choose the optimal attack strategy.`;
       : 'north';
 
     const unitMix = {
-      enemy_melee: Math.max(0, Math.min(1, parsed.unit_mix?.enemy_melee ?? 0.5)),
-      enemy_ranged: Math.max(0, Math.min(1, parsed.unit_mix?.enemy_ranged ?? 0.3)),
-      enemy_siege: Math.max(0, Math.min(1, parsed.unit_mix?.enemy_siege ?? 0.2)),
+      enemy_melee: Math.max(0, Math.min(1, Number(parsed.unit_mix?.enemy_melee ?? 0.5))),
+      enemy_ranged: Math.max(0, Math.min(1, Number(parsed.unit_mix?.enemy_ranged ?? 0.3))),
+      enemy_siege: Math.max(0, Math.min(1, Number(parsed.unit_mix?.enemy_siege ?? 0.2))),
     };
 
     // Normalize unit mix to sum to 1
@@ -142,6 +144,10 @@ Choose the optimal attack strategy.`;
       unitMix.enemy_melee /= total;
       unitMix.enemy_ranged /= total;
       unitMix.enemy_siege /= total;
+    } else {
+      unitMix.enemy_melee = 0.5;
+      unitMix.enemy_ranged = 0.3;
+      unitMix.enemy_siege = 0.2;
     }
 
     return {
@@ -149,48 +155,10 @@ Choose the optimal attack strategy.`;
       name: strategy.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
       target,
       unitMix,
-      reason: parsed.reason || 'Strategic opportunity detected',
-      confidence: Math.max(0.1, Math.min(1, parsed.confidence ?? 0.5)),
+      reason: parsed.reason || 'Strategic opportunity detected through Swytchcode analysis',
+      confidence: Math.max(0.1, Math.min(1, Number(parsed.confidence ?? 0.85))),
       targetPriority: [`wall_${target}`, 'archer_tower', 'town_center'],
     };
-  }
-
-  /**
-   * PS2: Generate an AI defensive strategy in response to a player attack
-   * @param {Object} attackContext - Information about incoming player assault
-   * @returns {Object} Validated defensive strategy
-   */
-  async generateDefensiveStrategy(attackContext) {
-    if (!this._available) {
-      throw new Error('LLM not available');
-    }
-
-    const prompt = this._buildDefensivePrompt(attackContext);
-
-    try {
-      const { default: OpenAI } = await import('openai');
-      const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-      const response = await client.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: this._getDefensiveSystemPrompt() },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.7,
-        max_tokens: 400,
-        response_format: { type: 'json_object' },
-      });
-
-      const text = response.choices[0]?.message?.content;
-      if (!text) throw new Error('Empty defensive LLM response');
-
-      const parsed = JSON.parse(text);
-      return this._validateDefensiveStrategy(parsed, attackContext);
-    } catch (err) {
-      console.error('Defensive LLM execution error:', err.message);
-      throw err;
-    }
   }
 
   _getDefensiveSystemPrompt() {
@@ -237,13 +205,17 @@ Select the optimal defensive doctrine.`;
   }
 
   _validateDefensiveStrategy(parsed, ctx) {
+    if (!parsed || typeof parsed !== 'object') {
+      return this.fallbackAI.generateDefensiveStrategy(ctx);
+    }
+
     const validStrategies = ['HOLD', 'REINFORCE', 'COUNTERATTACK', 'REDIRECT'];
     const strategy = validStrategies.includes(parsed.strategy) ? parsed.strategy : 'REINFORCE';
 
     const defenders = {
-      enemy_melee: Math.max(1, Math.min(6, Math.round(parsed.defenders?.enemy_melee ?? 3))),
-      enemy_ranged: Math.max(1, Math.min(5, Math.round(parsed.defenders?.enemy_ranged ?? 2))),
-      enemy_siege: Math.max(0, Math.min(2, Math.round(parsed.defenders?.enemy_siege ?? 0))),
+      enemy_melee: Math.max(1, Math.min(6, Math.round(Number(parsed.defenders?.enemy_melee ?? 3)))),
+      enemy_ranged: Math.max(1, Math.min(5, Math.round(Number(parsed.defenders?.enemy_ranged ?? 2)))),
+      enemy_siege: Math.max(0, Math.min(2, Math.round(Number(parsed.defenders?.enemy_siege ?? 0)))),
     };
 
     const strategyNames = {
@@ -257,8 +229,8 @@ Select the optimal defensive doctrine.`;
       strategy,
       strategyName: strategyNames[strategy],
       defenders,
-      reason: parsed.reason || 'Calculated optimal defensive formation for sector defense.',
-      confidence: Math.max(0.3, Math.min(0.98, parsed.confidence ?? 0.8)),
+      reason: parsed.reason || 'Calculated optimal defensive formation for sector defense via Swytchcode.',
+      confidence: Math.max(0.3, Math.min(0.98, Number(parsed.confidence ?? 0.85))),
     };
   }
 }

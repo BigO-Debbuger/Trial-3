@@ -1,7 +1,7 @@
 {
   "vibewright.openai": {
     "version": "1.0.0",
-    "sandbox_endpoint": "http://localhost:5173/",
+    "sandbox_endpoint": "http://127.0.0.1:5173",
     "production_endpoint": "http://localhost",
     "methods": 304,
     "auth": {

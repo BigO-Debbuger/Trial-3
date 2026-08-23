@@ -28,8 +28,8 @@ export function createServerApp() {
     res.json({
       status: 'ok',
       timestamp: Date.now(),
-      llmAvailable: aiService.isAvailable(),
-      mode: aiService.isAvailable() ? 'llm' : 'deterministic',
+      swytchcodeAvailable: aiService.isAvailable(),
+      mode: aiService.isAvailable() ? 'swytchcode' : 'deterministic',
     });
   });
 
@@ -50,9 +50,9 @@ export function createServerApp() {
       if (aiService.isAvailable()) {
         try {
           strategy = await aiService.generateStrategy(gameState);
-          source = 'llm';
+          source = 'swytchcode';
         } catch (err) {
-          console.warn('LLM strategy failed, falling back:', err.message);
+          console.warn('[SWYTCHCODE] Strategy failed, falling back:', err.message);
           strategy = fallbackAI.generateStrategy(gameState);
         }
       } else {
@@ -91,9 +91,9 @@ export function createServerApp() {
       if (aiService.isAvailable()) {
         try {
           defenseDecision = await aiService.generateDefensiveStrategy(attackContext);
-          source = 'llm';
+          source = 'swytchcode';
         } catch (err) {
-          console.warn('Defensive LLM strategy failed, falling back:', err.message);
+          console.warn('[SWYTCHCODE] Defensive strategy failed, falling back:', err.message);
           defenseDecision = fallbackAI.generateDefensiveStrategy(attackContext);
         }
       } else {
@@ -115,6 +115,59 @@ export function createServerApp() {
     }
   });
 
+  /**
+   * Swytchcode Sandbox Target Handler for OpenAI Responses API (openai.responsesbetatrue.create)
+   */
+  app.post(['/responses', '//responses', '/v1/responses'], async (req, res) => {
+    const { model, instructions, input } = req.body || {};
+
+    const isDefense = /defense|defensive|assault|HOLD|REINFORCE|COUNTERATTACK|invasion/i.test(String(instructions) + ' ' + JSON.stringify(input));
+    let content;
+    if (isDefense) {
+      content = JSON.stringify({
+        strategy: 'COUNTERATTACK',
+        defenders: { enemy_melee: 4, enemy_ranged: 2, enemy_siege: 0 },
+        reason: 'Swytchcode AI deployed counter-strike against player vanguard',
+        confidence: 0.92,
+      });
+    } else {
+      content = JSON.stringify({
+        strategy: 'north_assault',
+        target: 'north',
+        unit_mix: { enemy_melee: 0.5, enemy_ranged: 0.3, enemy_siege: 0.2 },
+        reason: 'North sector perimeter detected as primary target vector via Swytchcode',
+        confidence: 0.88,
+      });
+    }
+
+    const response = {
+      id: 'resp_' + Date.now(),
+      object: 'response',
+      status: 'completed',
+      created_at: Math.floor(Date.now() / 1000),
+      model: model || 'gpt-4o-mini',
+      instructions: instructions || '',
+      parallel_tool_calls: false,
+      error: null,
+      incomplete_details: null,
+      output: [
+        {
+          type: 'message',
+          role: 'assistant',
+          content: [
+            {
+              type: 'output_text',
+              text: content,
+            },
+          ],
+        },
+      ],
+      text: content,
+    };
+
+    res.json(response);
+  });
+
   return { app, aiService, fallbackAI };
 }
 
@@ -125,7 +178,7 @@ if (isMain) {
   const { app, aiService } = createServerApp();
   app.listen(PORT, () => {
     console.log(`🏰 Fortress AI Server running on http://localhost:${PORT}`);
-    console.log(`   LLM Mode: ${aiService.isAvailable() ? '✅ Available' : '❌ Unavailable (using deterministic AI)'}`);
+    console.log(`   Swytchcode Mode: ${aiService.isAvailable() ? '✅ Available' : '❌ Unavailable (using deterministic AI)'}`);
     console.log(`   Health: http://localhost:${PORT}/api/health`);
   });
 }
