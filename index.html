@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fortress AI — Adaptive Strategy Defense</title>
+    <meta name="description" content="A turn-based strategy game where an AI enemy continuously analyzes your defenses, learns from your decisions, and adapts its attack strategy." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <!-- Game Canvas (ALWAYS full viewport, z-index 0) -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- HUD Overlay — transparent flex layout over the canvas  -->
+    <!-- pointer-events: none so clicks go through to canvas    -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div id="hud-overlay">
+
+      <!-- Top Bar: Turn + Resources -->
+      <header id="top-bar">
+        <div id="turn-info">
+          <span class="turn-label">TURN</span>
+          <span id="turn-current" class="turn-num">1</span>
+          <span class="turn-sep">/</span>
+          <span id="turn-max" class="turn-num">20</span>
+        </div>
+        <div id="resource-bar">
+          <div class="resource-item" data-resource="gold">
+            <span class="res-icon">💰</span>
+            <span class="res-value" id="res-gold">800</span>
+            <span class="res-income" id="income-gold">(+25)</span>
+          </div>
+          <div class="resource-item" data-resource="wood">
+            <span class="res-icon">🪵</span>
+            <span class="res-value" id="res-wood">500</span>
+            <span class="res-income" id="income-wood">(+15)</span>
+          </div>
+          <div class="resource-item" data-resource="stone">
+            <span class="res-icon">🪨</span>
+            <span class="res-value" id="res-stone">400</span>
+            <span class="res-income" id="income-stone">(+10)</span>
+          </div>
+          <div class="resource-item" data-resource="food">
+            <span class="res-icon">🍖</span>
+            <span class="res-value" id="res-food">300</span>
+            <span class="res-income" id="income-food">(+15)</span>
+          </div>
+        </div>
+        <div id="population-info">
+          <span class="pop-icon">👥</span>
+          <span id="pop-current">0</span>
+          <span class="pop-sep">/</span>
+          <span id="pop-max">10</span>
+        </div>
+      </header>
+
+      <!-- Middle Area — transparent, game canvas shows through -->
+      <div id="hud-middle">
+
+        <!-- Compact Battle Log (top-left floating) -->
+        <aside id="left-panel">
+          <div class="panel-header">
+            <span class="panel-icon">📜</span>
+            <h2>Battle Log</h2>
+            <button id="battle-log-toggle" class="panel-collapse-btn" title="Toggle Battle Log">−</button>
+          </div>
+          <div id="battle-log-container">
+            <div id="battle-log"></div>
+          </div>
+        </aside>
+
+        <!-- AI Mini HUD Card (top-right floating, ~280px) -->
+        <div id="ai-mini-hud">
+          <div class="mini-ai-header">
+            <span>🤖</span> ENEMY AI
+          </div>
+          <div class="mini-ai-body">
+            <div class="mini-ai-row">
+              <span class="mini-label">Threat</span>
+              <span id="mini-ai-threat" class="mini-value threat-low">LOW</span>
+            </div>
+            <div class="mini-ai-row">
+              <span class="mini-label">Target</span>
+              <span id="mini-ai-target" class="mini-value">Scanning...</span>
+            </div>
+            <div class="mini-ai-row">
+              <span class="mini-label">Strategy</span>
+              <span id="mini-ai-strategy" class="mini-value">—</span>
+            </div>
+            <div class="mini-ai-row">
+              <span class="mini-label">Confidence</span>
+              <span id="mini-ai-confidence" class="mini-value">—</span>
+            </div>
+            <div id="mini-pipeline" class="mini-pipeline"></div>
+          </div>
+          <button id="ai-drawer-open" class="mini-details-btn" title="View Full AI Intelligence">VIEW AI ▸</button>
+        </div>
+
+      </div>
+
+      <!-- Bottom Panel: Build Actions -->
+      <footer id="bottom-panel">
+        <div id="build-tabs">
+          <button class="build-tab active" data-tab="build">🏗️ Build</button>
+          <button class="build-tab" data-tab="defense">🛡️ Defense</button>
+          <button class="build-tab" data-tab="units">⚔️ Units</button>
+          <button class="build-tab" data-tab="upgrades">⬆️ Upgrades</button>
+        </div>
+        <div id="build-cards-container">
+          <div id="build-cards"></div>
+        </div>
+        <button id="end-turn-btn">
+          <span class="btn-icon">⚡</span>
+          <span class="btn-text">END TURN</span>
+        </button>
+      </footer>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- Enemy Intelligence Drawer — OUTSIDE the HUD overlay    -->
+    <!-- Slides in from the right edge. Default: hidden.        -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <aside id="right-panel" class="drawer-closed">
+      <div class="drawer-header">
+        <div class="drawer-title-group">
+          <span class="panel-icon">🎯</span>
+          <h2>Enemy Intelligence</h2>
+        </div>
+        <button id="ai-drawer-close" class="drawer-close-btn" title="Close">×</button>
+      </div>
+      <div id="enemy-intel">
+        <div id="ai-status" class="intel-section">
+          <div class="intel-label">AI STATUS</div>
+          <div id="ai-status-indicator" class="status-ready">Monitoring</div>
+        </div>
+        <div id="enemy-strength" class="intel-section">
+          <div class="intel-label">ENEMY FORCE</div>
+          <div id="enemy-force-bar" class="force-bar">
+            <div class="force-fill" id="force-fill"></div>
+          </div>
+          <div id="enemy-unit-counts" class="unit-counts"></div>
+        </div>
+        <div id="weakest-point" class="intel-section">
+          <div class="intel-label">WEAKEST POINT</div>
+          <div id="weak-point-display">Scanning...</div>
+        </div>
+        <div id="predicted-attack" class="intel-section">
+          <div class="intel-label">PREDICTED ATTACK</div>
+          <div id="predicted-strategy">Awaiting intel...</div>
+          <div id="confidence-bar" class="confidence-bar">
+            <div class="confidence-fill" id="confidence-fill"></div>
+            <span id="confidence-value">0%</span>
+          </div>
+        </div>
+        <div id="ai-pipeline" class="intel-section">
+          <div class="intel-label">AI STRATEGY PROCESS</div>
+          <div id="pipeline-steps">
+            <div class="pipeline-step" data-step="scan">SCAN</div>
+            <div class="pipeline-step" data-step="evaluate">EVALUATE</div>
+            <div class="pipeline-step" data-step="plan">PLAN</div>
+            <div class="pipeline-step" data-step="score">SCORE</div>
+            <div class="pipeline-step" data-step="execute">EXECUTE</div>
+            <div class="pipeline-step" data-step="learn">LEARN</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Drawer Edge Toggle Tab (always visible on right edge) -->
+    <button id="ai-drawer-toggle" title="Toggle Enemy AI Intelligence">⚔ ENEMY AI</button>
+
+    <!-- Phase Banner (AI Turn overlay) — compact, centered -->
+    <div id="phase-banner" class="hidden">
+      <div class="phase-content">
+        <div class="phase-title" id="phase-title">ENEMY TURN</div>
+        <div class="phase-subtitle" id="phase-subtitle">AI analyzing defenses...</div>
+      </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="game-over-modal" class="modal hidden">
+      <div class="modal-content game-over-content">
+        <div id="game-over-icon" class="game-over-icon">⚔️</div>
+        <h1 id="game-over-title">DEFEAT</h1>
+        <p id="game-over-message">Your fortress has fallen.</p>
+        <div id="game-over-stats" class="game-over-stats"></div>
+        <button id="restart-btn" class="btn-primary">Play Again</button>
+      </div>
+    </div>
+
+    <!-- AI Disclosure Modal -->
+    <div id="ai-disclosure-modal" class="modal hidden">
+      <div class="modal-content disclosure-content">
+        <button class="modal-close" id="close-disclosure">&times;</button>
+        <h1>🤖 AI Disclosure</h1>
+        <div class="disclosure-sections">
+          <div class="disclosure-section">
+            <h2>AI Components</h2>
+            <ul>
+              <li><strong>Strategy Engine:</strong> The enemy AI uses a 6-step pipeline (SCAN → EVALUATE → PLAN → SCORE → EXECUTE → LEARN) to select attack strategies.</li>
+              <li><strong>LLM Integration (Optional):</strong> When connected, OpenAI via Swytchcode provides enhanced strategy reasoning.</li>
+              <li><strong>Adaptive Learning:</strong> The AI remembers previous attack outcomes and adjusts weights to try different strategies when others fail.</li>
+            </ul>
+          </div>
+          <div class="disclosure-section">
+            <h2>Deterministic Components</h2>
+            <ul>
+              <li><strong>Combat Resolution:</strong> All damage calculations use deterministic formulas with controlled random variance (±15%).</li>
+              <li><strong>Resource System:</strong> Income, costs, and building stats are fixed values.</li>
+              <li><strong>Game Rules:</strong> Turn limits, building placement, and win/loss conditions are fully deterministic.</li>
+            </ul>
+          </div>
+          <div class="disclosure-section">
+            <h2>Swytchcode Role</h2>
+            <p>Swytchcode sits between the game and OpenAI, handling authentication, execution policy, and retries. The LLM never modifies game state directly — all strategies are validated before execution.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="tooltip" class="hidden">
+      <div class="tooltip-title" id="tooltip-title"></div>
+      <div class="tooltip-body" id="tooltip-body"></div>
+    </div>
+
+    <!-- Settings button -->
+    <button id="settings-btn" title="Settings">⚙️</button>
+    <button id="ai-info-btn" title="AI Disclosure">🤖</button>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
