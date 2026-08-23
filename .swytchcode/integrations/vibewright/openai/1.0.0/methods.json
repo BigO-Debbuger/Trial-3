@@ -1,0 +1,1524 @@
+{
+  "methods": [
+    {
+      "method_uuid": "",
+      "method_name": "Accept a real-time call and set up its session",
+      "canonical_id": "openai.call.accept.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Activate organization certificates",
+      "canonical_id": "openai.certificate.activate.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Activate project certificates",
+      "canonical_id": "openai.project.activate.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Add a file chunk to an upload",
+      "canonical_id": "openai.part.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Add a message to a conversation thread",
+      "canonical_id": "openai.message.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Add a new skill",
+      "canonical_id": "openai.skill.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Add a user to a project",
+      "canonical_id": "openai.project.users.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Add a user to a specific organization group",
+      "canonical_id": "openai.group.users.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Add files to a vector store in batches",
+      "canonical_id": "openai.file_batche.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Add items to a specific conversation",
+      "canonical_id": "openai.item.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Archive a project within an organization",
+      "canonical_id": "openai.project.archive.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Assign a project role to a group",
+      "canonical_id": "openai.group.roles.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Assign a project role to a user",
+      "canonical_id": "openai.user.roles.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Assign an organization role to a group",
+      "canonical_id": "openai.group.roles.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Assign an organization role to a user",
+      "canonical_id": "openai.user.roles.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Attach a file to a vector store",
+      "canonical_id": "openai.file.create2"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Cancel a background model response by its ID",
+      "canonical_id": "openai.cancelbetatrue.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Cancel a background model response by its ID",
+      "canonical_id": "openai.cancel.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Cancel a ChatKit session and return its metadata",
+      "canonical_id": "openai.session.cancel"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Cancel a fine-tuning job",
+      "canonical_id": "openai.job.cancel"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Cancel a run that is in progress",
+      "canonical_id": "openai.run.cancel"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Cancel an in-progress batch and retrieve partial results",
+      "canonical_id": "openai.cancel.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Cancel an ongoing evaluation run",
+      "canonical_id": "openai.run.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Cancel an upload and prevent further parts from being added",
+      "canonical_id": "openai.cancel.create2"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Cancel processing for a vector store file batch",
+      "canonical_id": "openai.file_batche.cancel"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Classify text and image inputs for harmful content",
+      "canonical_id": "openai.moderation.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Compact a conversation to manage context",
+      "canonical_id": "openai.compact.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Compact a long conversation",
+      "canonical_id": "openai.compactbetatrue.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Complete an upload and get the resulting file",
+      "canonical_id": "openai.complete.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Convert text into speech audio",
+      "canonical_id": "openai.speech.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a character from an uploaded video",
+      "canonical_id": "openai.character.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a custom role for a project",
+      "canonical_id": "openai.role.create2"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a custom role for the organization",
+      "canonical_id": "openai.role.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a custom voice for audio output",
+      "canonical_id": "openai.voice.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a fine-tuning job to train a new model",
+      "canonical_id": "openai.job.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a new assistant with a specified model and instructions",
+      "canonical_id": "openai.assistant.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a new ChatKit session",
+      "canonical_id": "openai.session.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a new container",
+      "canonical_id": "openai.container.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a new conversation thread",
+      "canonical_id": "openai.thread.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a new group within the organization",
+      "canonical_id": "openai.group.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a new organization admin API key",
+      "canonical_id": "openai.admin_api_key.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a new project within the organization",
+      "canonical_id": "openai.project.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a new run for a specific thread",
+      "canonical_id": "openai.run.create2"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a new service account for a project",
+      "canonical_id": "openai.project.serviceAccounts.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a new skill version",
+      "canonical_id": "openai.version.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a new vector store",
+      "canonical_id": "openai.vector_store.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a new video from a prompt and optional reference assets",
+      "canonical_id": "openai.video.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a new video generation job by editing a source video",
+      "canonical_id": "openai.edit.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a project spend alert",
+      "canonical_id": "openai.project.spendAlerts.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a Realtime client secret for secure API access",
+      "canonical_id": "openai.client_secret.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a Realtime session and get an ephemeral API token",
+      "canonical_id": "openai.session.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a realtime transcription session with an ephemeral client token",
+      "canonical_id": "openai.transcription_session.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a Realtime translation client secret for client access",
+      "canonical_id": "openai.translation.clientSecrets.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create a thread and run it in one request",
+      "canonical_id": "openai.run.create4"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create an API key for a service account",
+      "canonical_id": "openai.project.apiKeys.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create an edited or extended image from source images and a prompt",
+      "canonical_id": "openai.edit.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create an evaluation structure to test model performance",
+      "canonical_id": "openai.eval.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create an extension for a completed video",
+      "canonical_id": "openai.extension.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create an organization spend alert",
+      "canonical_id": "openai.spend_alert.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create an upload object to add parts to",
+      "canonical_id": "openai.upload.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Create and run a batch from an uploaded file of requests",
+      "canonical_id": "openai.batche.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Deactivate certificates for a project",
+      "canonical_id": "openai.project.deactivate.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Deactivate organization certificates",
+      "canonical_id": "openai.certificate.deactivate.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete a ChatKit thread and its associated content",
+      "canonical_id": "openai.thread.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete a conversation",
+      "canonical_id": "openai.conversation.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete a file from a container",
+      "canonical_id": "openai.file.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete a fine-tuned model",
+      "canonical_id": "openai.model.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete a model response by its ID",
+      "canonical_id": "openai.response_idbetatrue.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete a model response by its ID",
+      "canonical_id": "openai.respons.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete a project's spend alert by ID",
+      "canonical_id": "openai.project.spendAlerts.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete a service account from a project",
+      "canonical_id": "openai.project.serviceAccounts.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete a specific evaluation run",
+      "canonical_id": "openai.run.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete a specific message from a thread",
+      "canonical_id": "openai.message.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete a specific thread by its ID",
+      "canonical_id": "openai.thread.delete1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete a specific vector store by its ID",
+      "canonical_id": "openai.vector_store.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete a stored chat completion by its ID",
+      "canonical_id": "openai.completion.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete a video and its associated assets",
+      "canonical_id": "openai.video.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete a voice consent recording by its ID",
+      "canonical_id": "openai.voice_consent.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete an assistant by its ID",
+      "canonical_id": "openai.assistant.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Delete an organization admin API key by its ID",
+      "canonical_id": "openai.admin_api_key.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Detect provenance signals in image or audio files",
+      "canonical_id": "openai.content_provenance_check.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Download a skill version zip bundle",
+      "canonical_id": "openai.version.content.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Download a skill zip bundle by its ID",
+      "canonical_id": "openai.content.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "End an active Realtime API call",
+      "canonical_id": "openai.call.hangup.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Generate a chat completion",
+      "canonical_id": "openai.completion.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Generate a model response using text, image, or custom code inputs",
+      "canonical_id": "openai.responsesbetatrue.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Generate an image from a text prompt",
+      "canonical_id": "openai.generation.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Generate model responses using text, image, or custom code inputs",
+      "canonical_id": "openai.respons.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Generate text completions based on a prompt",
+      "canonical_id": "openai.completion.create2"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Generate text embeddings for your content",
+      "canonical_id": "openai.embedding.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Generate variations of a given image using DALL-E 2",
+      "canonical_id": "openai.variation.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a ChatKit thread by its ID",
+      "canonical_id": "openai.thread.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a list of evaluations for a project",
+      "canonical_id": "openai.eval.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a list of organization certificates",
+      "canonical_id": "openai.certificate.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a list of organization projects",
+      "canonical_id": "openai.project.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a list of users in the organization",
+      "canonical_id": "openai.user.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a project's hard spend limit",
+      "canonical_id": "openai.project.spendLimit.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific API key within a project",
+      "canonical_id": "openai.project.apiKeys.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific batch by its ID",
+      "canonical_id": "openai.batche.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific file from a container",
+      "canonical_id": "openai.file.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific file from a vector store",
+      "canonical_id": "openai.file.get4"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific message from a thread",
+      "canonical_id": "openai.message.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific model response by its ID",
+      "canonical_id": "openai.respons.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific model response by its ID",
+      "canonical_id": "openai.response_idbetatrue.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific organization spend alert by its ID",
+      "canonical_id": "openai.spend_alert.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific project by its ID",
+      "canonical_id": "openai.project.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific project group by its ID",
+      "canonical_id": "openai.project.groups.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific project role by its ID",
+      "canonical_id": "openai.role.get2"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific project role for a group",
+      "canonical_id": "openai.group.roles.get3"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific project role for a user",
+      "canonical_id": "openai.user.roles.get3"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific project spend alert by its ID",
+      "canonical_id": "openai.project.spendAlerts.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific role assigned to a user in an organization",
+      "canonical_id": "openai.user.roles.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific run step within a thread",
+      "canonical_id": "openai.run.steps.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific run within a thread",
+      "canonical_id": "openai.run.get3"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific service account for a project",
+      "canonical_id": "openai.project.serviceAccounts.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific thread by its ID",
+      "canonical_id": "openai.thread.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific user within an organization group",
+      "canonical_id": "openai.group.users.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific vector store by its ID",
+      "canonical_id": "openai.vector_store.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a specific vector store file batch",
+      "canonical_id": "openai.file_batche.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a user by their unique ID",
+      "canonical_id": "openai.user.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a user within a specific project",
+      "canonical_id": "openai.project.users.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a user's project roles",
+      "canonical_id": "openai.user.roles.get2"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get a voice consent recording and its metadata",
+      "canonical_id": "openai.voice_consent.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get all items within a specific conversation",
+      "canonical_id": "openai.item.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get all project skills, with optional filtering and pagination",
+      "canonical_id": "openai.skill.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get an assistant by its ID",
+      "canonical_id": "openai.assistant.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get an organization role by its ID",
+      "canonical_id": "openai.role.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get an organization role for a specific group",
+      "canonical_id": "openai.group.roles.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get audio speech usage data for your organization",
+      "canonical_id": "openai.usage.audioSpeeches.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get character details by ID",
+      "canonical_id": "openai.character.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get code interpreter sessions usage for your organization",
+      "canonical_id": "openai.usage.codeInterpreterSessions.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get container details by ID",
+      "canonical_id": "openai.container.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get file information by its ID",
+      "canonical_id": "openai.file.get2"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get hosted tool permissions for a project",
+      "canonical_id": "openai.project.hostedToolPermissions.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get input items for a specific response",
+      "canonical_id": "openai.input_itemsbetatrue.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get input items for a specific response",
+      "canonical_id": "openai.input_item.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get input token counts for your request",
+      "canonical_id": "openai.input_tokensbetatrue.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get input token counts for your request",
+      "canonical_id": "openai.input_token.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get items for a ChatKit thread",
+      "canonical_id": "openai.thread.items.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get model details like owner and permissions",
+      "canonical_id": "openai.model.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get model permissions for a specific project",
+      "canonical_id": "openai.project.modelPermissions.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get organization API key details by ID",
+      "canonical_id": "openai.admin_api_key.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get organization audio transcription usage",
+      "canonical_id": "openai.usage.audioTranscriptions.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get organization audit logs for user actions and configuration changes",
+      "canonical_id": "openai.audit_log.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get organization data retention settings",
+      "canonical_id": "openai.data_retention.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get organization embeddings usage data",
+      "canonical_id": "openai.usage.embeddings.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get organization group by ID",
+      "canonical_id": "openai.group.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get organization image usage details",
+      "canonical_id": "openai.usage.images.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get organization invite by ID",
+      "canonical_id": "openai.invite.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get organization moderations usage details",
+      "canonical_id": "openai.usage.moderations.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get organization vector stores usage details",
+      "canonical_id": "openai.usage.vectorStores.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get organization's file search call usage details",
+      "canonical_id": "openai.usage.fileSearchCalls.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get organization's hard spend limit",
+      "canonical_id": "openai.spend_limit.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get project data retention settings",
+      "canonical_id": "openai.project.dataRetention.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get project rate limits by model",
+      "canonical_id": "openai.project.rateLimits.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get recently generated videos for the current project",
+      "canonical_id": "openai.video.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get roles for a specific project",
+      "canonical_id": "openai.role.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get the content of a specific file",
+      "canonical_id": "openai.content.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get the content of a specific file within a container",
+      "canonical_id": "openai.file.content.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get the content of a vector store file",
+      "canonical_id": "openai.file.content.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get the latest metadata for a video",
+      "canonical_id": "openai.video.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get users associated with a specific project",
+      "canonical_id": "openai.project.users.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Get web search call usage for your organization",
+      "canonical_id": "openai.usage.webSearchCalls.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Grant a group access to a project",
+      "canonical_id": "openai.project.groups.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Handle incoming live calls for Live acceptance",
+      "canonical_id": "openai.live_call_incoming.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Initiate a WebRTC call and get the SDP answer",
+      "canonical_id": "openai.call.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Invite a user to join your organization",
+      "canonical_id": "openai.invite.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List all organization groups",
+      "canonical_id": "openai.group.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List all versions for a specific skill",
+      "canonical_id": "openai.version.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List API keys for a specific project",
+      "canonical_id": "openai.project.apiKeys.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List available assistants with filtering and sorting options",
+      "canonical_id": "openai.assistant.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List available containers with filtering and sorting options",
+      "canonical_id": "openai.container.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List available models and their details",
+      "canonical_id": "openai.model.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List available vector stores",
+      "canonical_id": "openai.vector_store.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List certificates for a specific project",
+      "canonical_id": "openai.project.certificates.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List ChatKit threads with optional filters and pagination",
+      "canonical_id": "openai.thread.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List checkpoints for a fine-tuning job",
+      "canonical_id": "openai.job.checkpoints.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List files with optional filtering and sorting",
+      "canonical_id": "openai.file.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List files within a specific container",
+      "canonical_id": "openai.file.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List files within a specific vector store",
+      "canonical_id": "openai.file.get3"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List fine-tuning job events",
+      "canonical_id": "openai.job.events.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List organization admin API keys",
+      "canonical_id": "openai.admin_api_key.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List organization invites with optional pagination",
+      "canonical_id": "openai.invite.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List organization roles",
+      "canonical_id": "openai.role.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List organization roles for a specific group",
+      "canonical_id": "openai.group.roles.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List organization roles for a specific user",
+      "canonical_id": "openai.user.roles.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List organization spend alerts",
+      "canonical_id": "openai.spend_alert.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List project groups with access permissions",
+      "canonical_id": "openai.project.groups.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List project roles for a group in a project",
+      "canonical_id": "openai.group.roles.get2"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List project spend alerts",
+      "canonical_id": "openai.project.spendAlerts.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List run steps for a specific thread and run",
+      "canonical_id": "openai.run.steps.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List runs for a specific evaluation",
+      "canonical_id": "openai.run.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List runs for a specific thread",
+      "canonical_id": "openai.run.get2"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List service accounts for a project",
+      "canonical_id": "openai.project.serviceAccounts.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List users in a specific organization group",
+      "canonical_id": "openai.group.users.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List vector store files within a specific batch",
+      "canonical_id": "openai.file_batche.files.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List voice consent recordings for custom voices",
+      "canonical_id": "openai.voice_consent.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List your organization's batches",
+      "canonical_id": "openai.batche.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "List your organization's fine-tuning jobs",
+      "canonical_id": "openai.job.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Modify a specific message within a thread",
+      "canonical_id": "openai.message.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Modify a specific run within a thread",
+      "canonical_id": "openai.run.create3"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Modify a specific thread",
+      "canonical_id": "openai.thread.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Modify an assistant's details",
+      "canonical_id": "openai.assistant.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Notify about a failed batch",
+      "canonical_id": "openai.batch_failed.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Notify when a background response completes successfully",
+      "canonical_id": "openai.response_completed.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Notify when a background response fails",
+      "canonical_id": "openai.response_failed.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Notify when a background response is cancelled",
+      "canonical_id": "openai.response_cancelled.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Notify when a background response is incomplete",
+      "canonical_id": "openai.response_incomplete.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Notify when a batch expires before completion",
+      "canonical_id": "openai.batch_expired.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Notify when a batch has completed processing",
+      "canonical_id": "openai.batch_completed.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Notify when a batch is cancelled",
+      "canonical_id": "openai.batch_cancelled.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Notify when a fine-tuning job fails",
+      "canonical_id": "openai.fine_tuning_job_failed.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Notify when a fine-tuning job is cancelled",
+      "canonical_id": "openai.fine_tuning_job_cancelled.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Notify when a fine-tuning job succeeds",
+      "canonical_id": "openai.fine_tuning_job_succeeded.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Notify when an eval run is canceled",
+      "canonical_id": "openai.eval_run_canceled.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Notify when an evaluation run fails",
+      "canonical_id": "openai.eval_run_failed.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Notify when an evaluation run is successful",
+      "canonical_id": "openai.eval_run_succeeded.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Pause a fine-tuning job",
+      "canonical_id": "openai.job.pause"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Receive notification of an incoming Realtime call",
+      "canonical_id": "openai.realtime_call_incoming.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Reject an incoming SIP call with a status code",
+      "canonical_id": "openai.call.reject"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remix a video with a new prompt",
+      "canonical_id": "openai.remix.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove a container by its ID",
+      "canonical_id": "openai.container.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove a custom role from a project",
+      "canonical_id": "openai.role.delete1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove a custom role from the organization",
+      "canonical_id": "openai.role.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove a file from a vector store",
+      "canonical_id": "openai.file.delete2"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove a file from all vector stores",
+      "canonical_id": "openai.file.delete1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove a group from the organization",
+      "canonical_id": "openai.group.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove a permission for a fine-tuned model checkpoint",
+      "canonical_id": "openai.checkpoint.permissions.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove a project role from a group",
+      "canonical_id": "openai.group.roles.delete1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove a project's hard spend limit",
+      "canonical_id": "openai.project.spendLimit.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove a role from an organization user",
+      "canonical_id": "openai.user.roles.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove a skill using its unique identifier",
+      "canonical_id": "openai.skill.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove a specific skill version",
+      "canonical_id": "openai.version.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove a user from a group",
+      "canonical_id": "openai.group.users.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove a user from a project",
+      "canonical_id": "openai.project.users.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove a user from the organization",
+      "canonical_id": "openai.user.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove a user's role from a project",
+      "canonical_id": "openai.user.roles.delete1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove an API key from a project",
+      "canonical_id": "openai.project.apiKeys.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove an evaluation by its ID",
+      "canonical_id": "openai.eval.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove an item from a conversation",
+      "canonical_id": "openai.item.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove an organization invite by its ID",
+      "canonical_id": "openai.invite.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove an organization spend alert by its ID",
+      "canonical_id": "openai.spend_alert.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove an organization's certificate",
+      "canonical_id": "openai.certificate.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove model permissions from a project",
+      "canonical_id": "openai.project.modelPermissions.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove organization role from group",
+      "canonical_id": "openai.group.roles.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Remove the organization's hard spend limit",
+      "canonical_id": "openai.spend_limit.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Resume a fine-tuning job",
+      "canonical_id": "openai.job.resume"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve a specific conversation by its ID",
+      "canonical_id": "openai.conversation.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve a specific evaluation run output item",
+      "canonical_id": "openai.run.outputItems.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve a specific evaluation run using its IDs",
+      "canonical_id": "openai.run.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve a specific evaluation using its unique ID",
+      "canonical_id": "openai.eval.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve a specific item from a conversation",
+      "canonical_id": "openai.item.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve a specific skill using its unique identifier",
+      "canonical_id": "openai.skill.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve a specific skill version by its ID and version number",
+      "canonical_id": "openai.version.get1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve a stored chat completion by its ID",
+      "canonical_id": "openai.completion.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve an organization's certificate by its ID",
+      "canonical_id": "openai.certificate.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve details for a specific fine-tuning job",
+      "canonical_id": "openai.job.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve messages for a specific thread",
+      "canonical_id": "openai.message.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve messages for a stored chat completion",
+      "canonical_id": "openai.completion.messages.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve organization cost details with filtering and grouping options",
+      "canonical_id": "openai.cost.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve organization's completions usage data",
+      "canonical_id": "openai.usage.completions.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve output items for a specific evaluation run",
+      "canonical_id": "openai.run.outputItems.get"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Retrieve stored chat completions",
+      "canonical_id": "openai.completion.list"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Revoke a group's access to a project",
+      "canonical_id": "openai.project.groups.delete"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Run a grader with specified parameters",
+      "canonical_id": "openai.alpha.run.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Search a vector store for relevant content",
+      "canonical_id": "openai.search.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Set or update a project's hard spend limit",
+      "canonical_id": "openai.project.spendLimit.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Set or update the organization's hard spend limit",
+      "canonical_id": "openai.spend_limit.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Share fine-tuned models with other projects in your organization",
+      "canonical_id": "openai.checkpoint.permissions.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Start a new conversation",
+      "canonical_id": "openai.conversation.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Start a new evaluation run with specified data and model configuration",
+      "canonical_id": "openai.run.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Stream video content or preview asset by ID",
+      "canonical_id": "openai.content.get2"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Submit tool outputs for a specific run within a thread",
+      "canonical_id": "openai.run.submitToolOutputs.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Transcribe audio into text in the input language",
+      "canonical_id": "openai.transcription.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Transfer an active call to a new destination",
+      "canonical_id": "openai.call.refer.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Translate audio into English",
+      "canonical_id": "openai.translation.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update a certificate's name",
+      "canonical_id": "openai.certificate.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update a conversation by its ID",
+      "canonical_id": "openai.conversation.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update a project role by ID",
+      "canonical_id": "openai.role.create3"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update a project within an organization",
+      "canonical_id": "openai.project.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update a project's rate limit",
+      "canonical_id": "openai.project.rateLimits.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update a project's spend alert",
+      "canonical_id": "openai.project.spendAlerts.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update a service account within a specific project",
+      "canonical_id": "openai.project.serviceAccounts.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update a skill's default version",
+      "canonical_id": "openai.skill.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update a user's role in the organization",
+      "canonical_id": "openai.user.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update a user's role within a specific project",
+      "canonical_id": "openai.project.users.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update a vector store's configuration",
+      "canonical_id": "openai.vector_store.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update an evaluation's properties",
+      "canonical_id": "openai.eval.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update an organization role by its ID",
+      "canonical_id": "openai.role.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update an organization spend alert by ID",
+      "canonical_id": "openai.spend_alert.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update attributes for a vector store file",
+      "canonical_id": "openai.file.create3"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update hosted tool permissions for a project",
+      "canonical_id": "openai.project.hostedToolPermissions.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update metadata for a stored chat completion",
+      "canonical_id": "openai.completion.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update model permissions for a project",
+      "canonical_id": "openai.project.modelPermissions.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update organization data retention settings",
+      "canonical_id": "openai.data_retention.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update organization group information",
+      "canonical_id": "openai.group.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update project data retention settings",
+      "canonical_id": "openai.project.dataRetention.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Update voice consent recording metadata",
+      "canonical_id": "openai.voice_consent.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Upload a certificate for an organization",
+      "canonical_id": "openai.certificate.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Upload a file for use across endpoints",
+      "canonical_id": "openai.file.create1"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Upload a file to a container",
+      "canonical_id": "openai.file.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Upload a voice consent recording for custom voice creation",
+      "canonical_id": "openai.voice_consent.create"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "Validate a grader's configuration",
+      "canonical_id": "openai.alpha.graders.validate"
+    },
+    {
+      "method_uuid": "",
+      "method_name": "View all permissions for a fine-tuned model checkpoint",
+      "canonical_id": "openai.checkpoint.permissions.get"
+    }
+  ]
+}
